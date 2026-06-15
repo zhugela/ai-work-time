@@ -187,15 +187,27 @@
   </div>
 </div>
 
-<script src="assets/app.js"></script>
+<script src="assets/app.js?v=20260615"></script>
 <script>
-  // 拖拽
+  // 拖拽（用计数器防 dragleave 抖动）
   const ua = document.getElementById('uploadArea');
   if (ua) {
-    ['dragover', 'dragenter'].forEach(ev => ua.addEventListener(ev, e => { e.preventDefault(); ua.classList.add('dragover'); }));
-    ['dragleave', 'drop'].forEach(ev => ua.addEventListener(ev, e => { e.preventDefault(); ua.classList.remove('dragover'); }));
+    let dragCounter = 0;
+    ua.addEventListener('dragenter', e => {
+      e.preventDefault();
+      dragCounter++;
+      ua.classList.add('dragover');
+    });
+    ua.addEventListener('dragover', e => { e.preventDefault(); });
+    ua.addEventListener('dragleave', e => {
+      e.preventDefault();
+      dragCounter = Math.max(0, dragCounter - 1);
+      if (dragCounter === 0) ua.classList.remove('dragover');
+    });
     ua.addEventListener('drop', e => {
       e.preventDefault();
+      dragCounter = 0;
+      ua.classList.remove('dragover');
       openModal('modal-import-preview');
     });
   }

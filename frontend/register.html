@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>注册 · 个人记账</title>
+<meta name="viewport" content="width=1280">
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/components.css">
+</head>
+<body>
+<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(180deg,var(--brand-50) 0%,var(--bg-page) 60%);padding:24px;">
+  <div class="card" style="width:480px;padding:40px">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:32px">
+      <div style="width:36px;height:36px;border-radius:var(--radius-md);background:var(--brand-500);color:#FFF;display:flex;align-items:center;justify-content:center;font-weight:700">记</div>
+      <h1 style="font-size:22px;font-weight:600">注册 · 个人记账</h1>
+    </div>
+    <form id="regForm" onsubmit="return false;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="field"><label>用户名 <span class="req">*</span></label><input class="input" name="username" placeholder="4-20 位"><span class="err-msg" data-for="username"></span></div>
+        <div class="field"><label>昵称</label><input class="input" name="nickname" placeholder="选填"></div>
+      </div>
+      <div class="field"><label>邮箱 <span class="req">*</span></label><input class="input" name="email" placeholder="name@example.com"><span class="err-msg" data-for="email"></span></div>
+      <div class="field"><label>手机号</label><input class="input" name="phone" placeholder="选填，11 位手机号"><span class="err-msg" data-for="phone"></span></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="field"><label>密码 <span class="req">*</span></label><input class="input" name="password" type="password" placeholder="8-32 位含字母+数字"><span class="err-msg" data-for="password"></span></div>
+        <div class="field"><label>确认密码 <span class="req">*</span></label><input class="input" name="confirm" type="password"><span class="err-msg" data-for="confirm"></span></div>
+      </div>
+      <div class="field">
+        <label style="display:flex;align-items:center;gap:6px;font-weight:400">
+          <input type="checkbox" checked> 我已阅读并同意 <a href="#">《用户协议》</a>
+        </label>
+      </div>
+      <button class="btn btn-primary btn-lg btn-block" onclick="doRegister()">注 册</button>
+      <p style="margin-top:16px;text-align:center;color:var(--text-tertiary);font-size:var(--fs-caption)">
+        已有账号？<a href="login.html">直接登录</a>
+      </p>
+    </form>
+  </div>
+</div>
+<script src="assets/api.js"></script>
+<script>
+  function doRegister() {
+    const f = document.getElementById('regForm');
+    const u = f.username.value.trim(), e = f.email.value.trim(), p = f.password.value, c = f.confirm.value;
+    let ok = true;
+    f.querySelectorAll('.err-msg').forEach(x => x.textContent = '');
+    if (!/^[A-Za-z0-9_]{4,20}$/.test(u)) { f.querySelector('[data-for="username"]').textContent = '4-20 位字母/数字/下划线'; ok = false; }
+    if (!/^[\w.+-]+@[\w-]+\.[\w.-]+$/.test(e)) { f.querySelector('[data-for="email"]').textContent = '邮箱格式错误'; ok = false; }
+    if (!/(?=.*[A-Za-z])(?=.*\d).{8,32}/.test(p)) { f.querySelector('[data-for="password"]').textContent = '8-32 位含字母+数字'; ok = false; }
+    if (p !== c) { f.querySelector('[data-for="confirm"]').textContent = '两次密码不一致'; ok = false; }
+    if (!ok) return;
+    Api.post('/api/auth/register', { username: u, nickname: f.nickname.value, email: e, password: p })
+      .then(r => { Api.setToken(r.data.token); alert('注册成功'); location.href = 'login.html'; })
+      .catch(err => alert('注册失败：' + (err.message || err)));
+  }
+</script>
+</body>
+</html>
