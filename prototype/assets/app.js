@@ -86,10 +86,44 @@
   };
 
   // -------- Book switcher --------
+  // 切换账本：顶栏名称 + 侧边栏账本高亮 + 面包屑 + localStorage
   window.setBook = function (name) {
+    // 1) 顶栏切换器名称
     document.querySelectorAll('.book-switcher .name').forEach(n => n.textContent = name);
-    localStorage.setItem('jz_book', name);
+    // 2) 账本列表/账本管理页的卡片激活态
+    document.querySelectorAll('.book-card').forEach(c => {
+      const n = c.querySelector('.book-name');
+      c.classList.toggle('active', n && n.textContent.trim() === name);
+    });
+    // 3) 面包屑中的账本名（保留末尾加粗的当前页）
+    document.querySelectorAll('.crumb').forEach(cr => {
+      // 找到第一个 <b> 节点之前的文本节点并替换；不动 <b>
+      const b = cr.querySelector('b');
+      const tail = b ? ' / <b>' + b.textContent + '</b>' : '';
+      cr.innerHTML = name + tail;
+    });
+    // 4) localStorage 持久化
+    try { localStorage.setItem('jz_book', name); } catch (_) {}
+    // 5) 关闭所有账本相关弹窗
+    document.querySelectorAll('.modal-mask.open').forEach(m => m.classList.remove('open'));
+    // 6) 反馈
+    if (window.toast) window.toast('已切换到「' + name + '」', 'success', 1500);
   };
+
+  // -------- 页面初始化时还原账本（仅顶栏） --------
+  try {
+    const saved = localStorage.getItem('jz_book');
+    if (saved) {
+      const applyTop = () => {
+        document.querySelectorAll('.book-switcher .name').forEach(n => { n.textContent = saved; });
+      };
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', applyTop);
+      } else {
+        applyTop();
+      }
+    }
+  } catch (_) {}
 
   // -------- Active nav highlight --------
   const path = location.pathname.split('/').pop() || 'index.html';

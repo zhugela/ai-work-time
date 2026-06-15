@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>登录 · 个人记账</title>
+<meta name="viewport" content="width=1280">
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/components.css">
+</head>
+<body>
+<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(180deg,var(--brand-50) 0%,var(--bg-page) 60%);padding:24px;">
+  <div class="card" style="width:420px;padding:40px">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:32px">
+      <div style="width:36px;height:36px;border-radius:var(--radius-md);background:var(--brand-500);color:#FFF;display:flex;align-items:center;justify-content:center;font-weight:700">记</div>
+      <h1 style="font-size:22px;font-weight:600">登录 · 个人记账</h1>
+    </div>
+    <form id="loginForm" onsubmit="return false;">
+      <div class="field">
+        <label>账号 <span class="req">*</span></label>
+        <input class="input" name="account" placeholder="用户名 / 手机号 / 邮箱" value="alice">
+        <span class="err-msg" data-for="account"></span>
+      </div>
+      <div class="field">
+        <label>密码 <span class="req">*</span></label>
+        <input class="input" name="password" type="password" placeholder="请输入密码" value="Pass1234">
+        <span class="err-msg" data-for="password"></span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin:8px 0 24px;font-size:var(--fs-body-sm)">
+        <label style="display:flex;align-items:center;gap:6px;font-weight:400"><input type="checkbox" checked> 记住我</label>
+        <a href="#">忘记密码？</a>
+      </div>
+      <button class="btn btn-primary btn-lg btn-block" onclick="doLogin()">登 录</button>
+      <p style="margin-top:16px;text-align:center;color:var(--text-tertiary);font-size:var(--fs-caption)">
+        还没有账号？<a href="register.html">立即注册</a>
+      </p>
+    </form>
+  </div>
+</div>
+<script src="assets/api.js"></script>
+<script>
+  function doLogin() {
+    const form = document.getElementById('loginForm');
+    const acc = form.querySelector('[name="account"]').value.trim();
+    const pw  = form.querySelector('[name="password"]').value.trim();
+    let ok = true;
+    form.querySelectorAll('.err-msg').forEach(e => e.textContent = '');
+    if (!acc) { form.querySelector('[data-for="account"]').textContent = '请输入账号'; ok = false; }
+    if (!pw || pw.length < 8) { form.querySelector('[data-for="password"]').textContent = '密码至少 8 位'; ok = false; }
+    if (!ok) return;
+    Api.post('/api/auth/login', { account: acc, password: pw })
+      .then(r => {
+        Api.setToken(r.data.token);
+        try { localStorage.setItem('jz_user', JSON.stringify(r.data.user)); } catch (_) {}
+        location.href = 'pages/transaction-new.html';
+      })
+      .catch(err => {
+        // 失败时也允许 mock 进入（前端原型容错）
+        console.warn('login failed:', err);
+        if (confirm('后端未启动，是否仍以前端原型模式进入？')) {
+          location.href = 'pages/transaction-new.html';
+        }
+      });
+  }
+</script>
+</body>
+</html>
