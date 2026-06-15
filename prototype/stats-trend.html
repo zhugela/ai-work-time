@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>收支趋势 · 个人记账</title>
+<link rel="stylesheet" href="assets/app.css">
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand"><div class="logo">记</div><span>个人记账</span></div>
+    <nav class="nav">
+      <div class="nav-section">
+        <div class="nav-title">主导航</div>
+        <a class="nav-item" href="books.html"><span class="icon">📒</span>账本</a>
+        <a class="nav-item" href="transactions.html"><span class="icon">📋</span>收支明细</a>
+        <a class="nav-item" href="transaction-new.html"><span class="icon">✏️</span>快速录入</a>
+        <a class="nav-item" href="categories.html"><span class="icon">🏷️</span>分类管理</a>
+        <a class="nav-item" href="budgets.html"><span class="icon">🎯</span>月度预算</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-title">报表</div>
+        <a class="nav-item" href="stats-monthly.html"><span class="icon">📊</span>月度统计</a>
+        <a class="nav-item" href="stats-breakdown.html"><span class="icon">🥧</span>分类占比</a>
+        <a class="nav-item" href="stats-trend.html"><span class="icon">📈</span>收支趋势</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-title">数据</div>
+        <a class="nav-item" href="import-export.html"><span class="icon">📁</span>导入导出</a>
+      </div>
+    </nav>
+    <div class="sidebar-foot">v1.0 · 私有部署</div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="crumb">日常账本 / <b>收支趋势</b></div>
+      <div class="topbar-right">
+        <div class="book-switcher"><span>🏠</span><span class="name">日常账本</span><span style="color:var(--text-tertiary)">▾</span></div>
+        <button class="icon-btn" onclick="toggleTheme()">🌓</button>
+        <a href="settings.html" style="text-decoration:none"><div class="avatar">A</div></a>
+      </div>
+    </header>
+
+    <div class="content">
+      <div class="page-head">
+        <div>
+          <h1 class="page-title">收支趋势</h1>
+          <p class="page-sub">长期财务变化追踪</p>
+        </div>
+        <div style="display:flex;gap:12px">
+          <select class="select" style="width:140px"><option>近 6 个月</option><option>近 12 个月</option></select>
+        </div>
+      </div>
+
+      <!-- 趋势图（纯 SVG 双折线） -->
+      <div class="card" style="margin-bottom:24px">
+        <div class="card-head">
+          <div class="card-title">近 6 月趋势</div>
+          <div class="trend-legend">
+            <span><i class="dot" style="background:var(--income-500)"></i>收入</span>
+            <span><i class="dot" style="background:var(--expense-500)"></i>支出</span>
+            <span><i class="dot" style="background:var(--brand-500)"></i>结余</span>
+          </div>
+        </div>
+        <svg viewBox="0 0 700 280" class="trend-svg" preserveAspectRatio="none">
+          <!-- 网格线 -->
+          <g stroke="var(--n-100)" stroke-width="1">
+            <line x1="40" y1="40" x2="680" y2="40"/>
+            <line x1="40" y1="100" x2="680" y2="100"/>
+            <line x1="40" y1="160" x2="680" y2="160"/>
+            <line x1="40" y1="220" x2="680" y2="220"/>
+            <line x1="40" y1="240" x2="680" y2="240"/>
+          </g>
+          <!-- Y 轴标签 -->
+          <g font-size="10" fill="var(--text-tertiary)">
+            <text x="30" y="44" text-anchor="end">15k</text>
+            <text x="30" y="104" text-anchor="end">10k</text>
+            <text x="30" y="164" text-anchor="end">5k</text>
+            <text x="30" y="224" text-anchor="end">0</text>
+          </g>
+          <!-- 收入折线（绿）：12.5, 12.5, 12.5, 12.5, 12.5, 13.0 -->
+          <polyline points="80,80 180,80 280,80 380,80 480,80 580,72"
+                    fill="none" stroke="var(--income-500)" stroke-width="2.5"/>
+          <!-- 支出折线（红）：4.2, 3.9, 3.5, 3.7, 3.7, 3.3 -->
+          <polyline points="80,178 180,184 280,192 380,188 480,188 580,196"
+                    fill="none" stroke="var(--expense-500)" stroke-width="2.5"/>
+          <!-- 结余折线（蓝）：8.3, 8.6, 9.0, 8.8, 8.8, 9.7 -->
+          <polyline points="80,128 180,124 280,116 380,120 480,120 580,104"
+                    fill="none" stroke="var(--brand-500)" stroke-width="2.5" stroke-dasharray="4 2"/>
+          <!-- 数据点 -->
+          <g fill="#fff" stroke-width="2">
+            <circle cx="80" cy="80" r="4" stroke="var(--income-500)"/>
+            <circle cx="180" cy="80" r="4" stroke="var(--income-500)"/>
+            <circle cx="280" cy="80" r="4" stroke="var(--income-500)"/>
+            <circle cx="380" cy="80" r="4" stroke="var(--income-500)"/>
+            <circle cx="480" cy="80" r="4" stroke="var(--income-500)"/>
+            <circle cx="580" cy="72" r="4" stroke="var(--income-500)"/>
+            <circle cx="80" cy="178" r="4" stroke="var(--expense-500)"/>
+            <circle cx="180" cy="184" r="4" stroke="var(--expense-500)"/>
+            <circle cx="280" cy="192" r="4" stroke="var(--expense-500)"/>
+            <circle cx="380" cy="188" r="4" stroke="var(--expense-500)"/>
+            <circle cx="480" cy="188" r="4" stroke="var(--expense-500)"/>
+            <circle cx="580" cy="196" r="4" stroke="var(--expense-500)"/>
+            <circle cx="80" cy="128" r="3" stroke="var(--brand-500)"/>
+            <circle cx="180" cy="124" r="3" stroke="var(--brand-500)"/>
+            <circle cx="280" cy="116" r="3" stroke="var(--brand-500)"/>
+            <circle cx="380" cy="120" r="3" stroke="var(--brand-500)"/>
+            <circle cx="480" cy="120" r="3" stroke="var(--brand-500)"/>
+            <circle cx="580" cy="104" r="3" stroke="var(--brand-500)"/>
+          </g>
+          <!-- X 轴标签 -->
+          <g font-size="11" fill="var(--text-tertiary)" text-anchor="middle">
+            <text x="80" y="262">2026-01</text>
+            <text x="180" y="262">2026-02</text>
+            <text x="280" y="262">2026-03</text>
+            <text x="380" y="262">2026-04</text>
+            <text x="480" y="262">2026-05</text>
+            <text x="580" y="262">2026-06</text>
+          </g>
+        </svg>
+      </div>
+
+      <!-- 趋势数据表 -->
+      <div class="card">
+        <div class="card-head"><div class="card-title">月度数据明细</div></div>
+        <table>
+          <thead><tr><th>月份</th><th class="num">收入</th><th class="num">支出</th><th class="num">结余</th><th>环比</th></tr></thead>
+          <tbody>
+            <tr><td>2026-06</td><td class="num income-c">¥13,000.00</td><td class="num expense-c">¥3,256.80</td><td class="num"><b>¥9,743.20</b></td><td><span class="tag tag-income">↑ 10.9%</span></td></tr>
+            <tr><td>2026-05</td><td class="num income-c">¥12,500.00</td><td class="num expense-c">¥3,716.00</td><td class="num">¥8,784.00</td><td><span class="tag tag-warn">↓ 0.4%</span></td></tr>
+            <tr><td>2026-04</td><td class="num income-c">¥12,500.00</td><td class="num expense-c">¥3,210.00</td><td class="num">¥9,290.00</td><td><span class="tag tag-income">↑ 3.2%</span></td></tr>
+            <tr><td>2026-03</td><td class="num income-c">¥12,500.00</td><td class="num expense-c">¥3,520.00</td><td class="num">¥8,980.00</td><td><span class="tag tag-warn">↓ 1.1%</span></td></tr>
+            <tr><td>2026-02</td><td class="num income-c">¥12,500.00</td><td class="num expense-c">¥3,610.00</td><td class="num">¥8,890.00</td><td><span class="tag tag-income">↑ 2.3%</span></td></tr>
+            <tr><td>2026-01</td><td class="num income-c">¥12,500.00</td><td class="num expense-c">¥4,210.00</td><td class="num">¥8,290.00</td><td>—</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+<script src="assets/app.js"></script>
+</body>
+</html>

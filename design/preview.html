@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<title>Design System Preview · Light · 个人记账</title>
+<meta name="viewport" content="width=1280">
+<style>
+  /* ============== Design Tokens ============== */
+  :root {
+    --brand-50:#EEF4FF; --brand-100:#D9E6FF; --brand-300:#7CA6F5;
+    --brand-500:#3B6EE8; --brand-600:#2E5BC6; --brand-700:#1F479F;
+    --income-500:#1FB85B; --income-100:#E6F8EE;
+    --expense-500:#E5484D; --expense-100:#FCEDED;
+    --warn-500:#F5A524; --warn-100:#FEF6E6;
+    --info-500:#0EA5E9;
+    --n-0:#FFFFFF; --n-25:#FAFBFC; --n-50:#F5F7FA; --n-100:#EEF1F6;
+    --n-200:#E1E6EF; --n-300:#C9D1DE; --n-400:#9AA4B5; --n-500:#6B7585;
+    --n-600:#4B5563; --n-700:#374151; --n-800:#1F2937; --n-900:#111827; --n-1000:#000;
+    --text-primary:var(--n-900); --text-secondary:var(--n-700);
+    --text-tertiary:var(--n-500); --text-disabled:var(--n-400);
+    --border-default:var(--n-200); --border-strong:var(--n-300); --divider:var(--n-100);
+    --bg-page:var(--n-50); --bg-elevated:#FFFFFF;
+    --bg-overlay:rgba(17,24,39,0.5);
+    --radius-xs:4px; --radius-sm:6px; --radius-md:8px;
+    --radius-lg:12px; --radius-xl:16px; --radius-full:9999px;
+    --shadow-xs:0 1px 2px rgba(15,23,42,0.05);
+    --shadow-sm:0 1px 3px rgba(15,23,42,0.08),0 1px 2px rgba(15,23,42,0.04);
+    --shadow-md:0 4px 12px rgba(15,23,42,0.08),0 2px 4px rgba(15,23,42,0.04);
+    --shadow-lg:0 12px 32px rgba(15,23,42,0.12),0 4px 8px rgba(15,23,42,0.04);
+    --space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;--space-5:20px;
+    --space-6:24px;--space-8:32px;--space-10:40px;--space-12:48px;--space-16:64px;
+    --fs-display:32px;--fs-h1:24px;--fs-h2:20px;--fs-h3:18px;
+    --fs-body-lg:16px;--fs-body:14px;--fs-body-sm:13px;--fs-caption:12px;
+    --fs-mono-lg:28px;--fs-mono:16px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Inter","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+       background:var(--bg-page);color:var(--text-primary);font-size:var(--fs-body);line-height:1.6;padding:40px;}
+  h1{font-size:var(--fs-display);font-weight:700;margin-bottom:8px}
+  h2{font-size:var(--fs-h1);font-weight:600;margin:48px 0 16px;padding-bottom:12px;border-bottom:1px solid var(--divider)}
+  h3{font-size:var(--fs-h2);font-weight:600;margin:24px 0 12px}
+  .sub{color:var(--text-secondary);margin-bottom:32px}
+  .grid{display:grid;gap:16px}
+  .grid-2{grid-template-columns:repeat(2,1fr)}
+  .grid-4{grid-template-columns:repeat(4,1fr)}
+  .grid-6{grid-template-columns:repeat(6,1fr)}
+  .grid-8{grid-template-columns:repeat(8,1fr)}
+  .grid-12{grid-template-columns:repeat(12,1fr)}
+  /* Color swatch */
+  .swatch{border:1px solid var(--border-default);border-radius:var(--radius-md);overflow:hidden;background:var(--bg-elevated)}
+  .swatch .chip{height:64px}
+  .swatch .meta{padding:8px 10px;font-size:var(--fs-caption)}
+  .swatch .meta b{display:block;color:var(--text-primary);font-weight:500}
+  .swatch .meta span{color:var(--text-tertiary);font-family:"JetBrains Mono",monospace}
+  /* Button */
+  .btn{display:inline-flex;align-items:center;gap:6px;height:40px;padding:0 16px;
+       border-radius:var(--radius-md);font-size:var(--fs-body);font-weight:500;
+       border:1px solid transparent;cursor:pointer;transition:all .15s ease-out;
+       font-family:inherit}
+  .btn:focus-visible{outline:2px solid var(--brand-300);outline-offset:2px}
+  .btn-primary{background:var(--brand-500);color:#fff}
+  .btn-primary:hover{background:var(--brand-600)}
+  .btn-secondary{background:var(--n-100);color:var(--text-primary)}
+  .btn-secondary:hover{background:var(--n-200)}
+  .btn-ghost{background:transparent;border-color:var(--border-strong);color:var(--text-primary)}
+  .btn-ghost:hover{background:var(--n-50)}
+  .btn-danger{background:var(--expense-500);color:#fff}
+  .btn-text{background:transparent;color:var(--brand-500);padding:0 8px}
+  .btn-text:hover{color:var(--brand-600)}
+  .btn-sm{height:32px;padding:0 12px;font-size:var(--fs-body-sm)}
+  .btn-lg{height:48px;padding:0 24px;font-size:var(--fs-body-lg)}
+  .btn:disabled{background:var(--n-200);color:var(--text-disabled);cursor:not-allowed}
+  /* Input */
+  .field{display:flex;flex-direction:column;gap:6px}
+  .field label{font-size:var(--fs-body-sm);color:var(--text-secondary);font-weight:500}
+  .field label .req{color:var(--expense-500);margin-left:2px}
+  .input{height:40px;padding:0 12px;border:1px solid var(--border-default);border-radius:var(--radius-sm);
+         background:var(--bg-elevated);color:var(--text-primary);font-size:var(--fs-body);font-family:inherit;
+         transition:all .15s ease-out;width:100%}
+  .input:focus{outline:none;border-color:var(--brand-500);box-shadow:0 0 0 4px var(--brand-100)}
+  .input.err{border-color:var(--expense-500)}
+  .err-msg{font-size:var(--fs-caption);color:var(--expense-500)}
+  /* Card */
+  .card{background:var(--bg-elevated);border:1px solid var(--border-default);
+        border-radius:var(--radius-lg);padding:24px;box-shadow:var(--shadow-sm)}
+  .card-title{font-size:var(--fs-h3);font-weight:600;margin-bottom:12px}
+  /* Tag */
+  .tag{display:inline-flex;align-items:center;height:22px;padding:0 8px;
+       border-radius:var(--radius-xs);font-size:var(--fs-caption);font-weight:500}
+  .tag-default{background:var(--n-100);color:var(--text-secondary)}
+  .tag-income{background:var(--income-100);color:var(--income-500)}
+  .tag-expense{background:var(--expense-100);color:var(--expense-500)}
+  .tag-warn{background:var(--warn-100);color:var(--warn-500)}
+  /* Table */
+  table{width:100%;border-collapse:collapse;background:var(--bg-elevated);
+        border:1px solid var(--border-default);border-radius:var(--radius-md);overflow:hidden}
+  th{background:var(--n-50);text-align:left;padding:0 16px;height:44px;
+     font-size:var(--fs-body-sm);font-weight:500;color:var(--text-secondary)}
+  td{padding:0 16px;height:56px;border-top:1px solid var(--divider);font-size:var(--fs-body)}
+  tr:hover td{background:var(--n-50)}
+  .num{font-family:"JetBrains Mono",monospace;text-align:right}
+  .income{color:var(--income-500);font-weight:500}
+  .expense{color:var(--expense-500);font-weight:500}
+  /* Type ramp */
+  .type{display:flex;flex-direction:column;gap:8px}
+  .type span{color:var(--text-tertiary);font-size:var(--fs-caption)}
+  /* Spacing visual */
+  .space-row{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+  .space-box{background:var(--brand-100);border-radius:2px}
+  .space-label{font-family:"JetBrains Mono",monospace;font-size:var(--fs-caption);color:var(--text-tertiary);width:80px}
+  /* Radius */
+  .radius-box{height:80px;background:var(--brand-50);border:1px solid var(--brand-100);
+              display:flex;align-items:center;justify-content:center;color:var(--brand-700);
+              font-family:"JetBrains Mono",monospace;font-size:var(--fs-caption)}
+  /* Shadow */
+  .shadow-box{height:120px;background:var(--bg-elevated);border-radius:var(--radius-lg);
+              display:flex;align-items:center;justify-content:center;color:var(--text-secondary)}
+</style>
+</head>
+<body>
+  <h1>个人记账 · 设计系统预览</h1>
+  <p class="sub">Light Theme · 浅色主题 · v1.0</p>
+
+  <!-- Color -->
+  <h2>1. 颜色 / Color Tokens</h2>
+  <h3>品牌主色 Brand</h3>
+  <div class="grid grid-6">
+    <div class="swatch"><div class="chip" style="background:var(--brand-50)"></div><div class="meta"><b>brand-50</b><span>#EEF4FF</span></div></div>
+    <div class="swatch"><div class="chip" style="background:var(--brand-100)"></div><div class="meta"><b>brand-100</b><span>#D9E6FF</span></div></div>
+    <div class="swatch"><div class="chip" style="background:var(--brand-300)"></div><div class="meta"><b>brand-300</b><span>#7CA6F5</span></div></div>
+    <div class="swatch"><div class="chip" style="background:var(--brand-500)"></div><div class="meta"><b>brand-500</b><span>#3B6EE8</span></div></div>
+    <div class="swatch"><div class="chip" style="background:var(--brand-600)"></div><div class="meta"><b>brand-600</b><span>#2E5BC6</span></div></div>
+    <div class="swatch"><div class="chip" style="background:var(--brand-700)"></div><div class="meta"><b>brand-700</b><span>#1F479F</span></div></div>
+  </div>
+  <h3>业务语义色 Semantic</h3>
+  <div class="grid grid-4">
+    <div class="swatch"><div class="chip" style="background:var(--income-500)"></div><div class="meta"><b>income-500</b><span>#1FB85B</span></div></div>
+    <div class="swatch"><div class="chip" style="background:var(--expense-500)"></div><div class="meta"><b>expense-500</b><span>#E5484D</span></div></div>
+    <div class="swatch"><div class="chip" style="background:var(--warn-500)"></div><div class="meta"><b>warn-500</b><span>#F5A524</span></div></div>
+    <div class="swatch"><div class="chip" style="background:var(--info-500)"></div><div class="meta"><b>info-500</b><span>#0EA5E9</span></div></div>
+  </div>
+  <h3>中性色阶 Neutral</h3>
+  <div class="grid grid-12">
+    <div class="swatch"><div class="chip" style="background:var(--n-0)"></div><div class="meta"><b>n-0</b><span>#FFF</span></div></div>
+    <div class="swatch"><div class="chip" style="background:var(--n-50)"></div><div class="meta"><b>n-50</b><span>#F5F7FA</span></div></div>
+    <div class="swatch"><div class="chip" style="background:var(--n-100)"></div><div class="meta"><b>n-100</b><span>#EEF1F6</span></div></div>
+    <div class="swatch"><div class="chip" style="background:var(--n-200)"></div><div class="meta"><b>n-200</b><span>#E1E6EF</span></div></div>
+    <div class="swatch"><div class="chip" style="background:var(--n-300)"></div><div class="meta"><b>n-300</b><span>#C9D1DE</span></div></div>
+    <div class="swatch"><div class="chip" style="background:var(--n-400)"></div><div class="meta"><b>n-400</b><span>#9AA4B5</span></div></div>
+    <div class="swatch"><div class="chip" style="background:var(--n-500)"></div><div class="meta"><b>n-500</b><span>#6B7585</span></div></div>
+    <div class="swatch"><div class="chip" style="background:var(--n-600)"></div><div class="meta"><b>n-600</b><span>#4B5563</span></div></div>
+    <div class="swatch"><div class="chip" style="background:var(--n-700)"></div><div class="meta"><b>n-700</b><span>#374151</span></div></div>
+    <div class="swatch"><div class="chip" style="background:var(--n-800)"></div><div class="meta"><b>n-800</b><span>#1F2937</span></div></div>
+    <div class="swatch"><div class="chip" style="background:var(--n-900)"></div><div class="meta"><b>n-900</b><span>#111827</span></div></div>
+    <div class="swatch"><div class="chip" style="background:var(--n-1000)"></div><div class="meta"><b>n-1000</b><span>#000</span></div></div>
+  </div>
+
+  <!-- Typography -->
+  <h2>2. 字体 / Typography</h2>
+  <div class="card">
+    <p style="font-size:var(--fs-display);font-weight:700">Display 32 / ¥12,580.00</p>
+    <p style="font-size:var(--fs-h1);font-weight:600;margin-top:8px">H1 页面主标题</p>
+    <p style="font-size:var(--fs-h2);font-weight:600;margin-top:8px">H2 区块标题</p>
+    <p style="font-size:var(--fs-h3);font-weight:600;margin-top:8px">H3 卡片标题</p>
+    <p style="font-size:var(--fs-body-lg);margin-top:8px">Body-lg 正文大号 16</p>
+    <p style="font-size:var(--fs-body);margin-top:8px">Body 正文 14 · 这是一段普通正文。</p>
+    <p style="font-size:var(--fs-body-sm);color:var(--text-secondary);margin-top:8px">Body-sm 辅助说明 13</p>
+    <p style="font-size:var(--fs-caption);color:var(--text-tertiary);margin-top:8px">Caption 标签 12</p>
+    <p style="font-size:var(--fs-mono-lg);font-family:'JetBrains Mono',monospace;margin-top:8px">¥ 3,256.80</p>
+  </div>
+
+  <!-- Spacing -->
+  <h2>3. 间距 / Spacing</h2>
+  <div class="card">
+    <div class="space-row"><span class="space-label">space-1 (4)</span><div class="space-box" style="width:4px;height:16px"></div></div>
+    <div class="space-row"><span class="space-label">space-2 (8)</span><div class="space-box" style="width:8px;height:16px"></div></div>
+    <div class="space-row"><span class="space-label">space-3 (12)</span><div class="space-box" style="width:12px;height:16px"></div></div>
+    <div class="space-row"><span class="space-label">space-4 (16)</span><div class="space-box" style="width:16px;height:16px"></div></div>
+    <div class="space-row"><span class="space-label">space-5 (20)</span><div class="space-box" style="width:20px;height:16px"></div></div>
+    <div class="space-row"><span class="space-label">space-6 (24)</span><div class="space-box" style="width:24px;height:16px"></div></div>
+    <div class="space-row"><span class="space-label">space-8 (32)</span><div class="space-box" style="width:32px;height:16px"></div></div>
+    <div class="space-row"><span class="space-label">space-10 (40)</span><div class="space-box" style="width:40px;height:16px"></div></div>
+    <div class="space-row"><span class="space-label">space-12 (48)</span><div class="space-box" style="width:48px;height:16px"></div></div>
+  </div>
+
+  <!-- Radius -->
+  <h2>4. 圆角 / Radius</h2>
+  <div class="grid grid-6">
+    <div class="radius-box" style="border-radius:var(--radius-xs)">xs 4</div>
+    <div class="radius-box" style="border-radius:var(--radius-sm)">sm 6</div>
+    <div class="radius-box" style="border-radius:var(--radius-md)">md 8</div>
+    <div class="radius-box" style="border-radius:var(--radius-lg)">lg 12</div>
+    <div class="radius-box" style="border-radius:var(--radius-xl)">xl 16</div>
+    <div class="radius-box" style="border-radius:var(--radius-full);height:80px;width:80px">full</div>
+  </div>
+
+  <!-- Shadow -->
+  <h2>5. 阴影 / Shadow</h2>
+  <div class="grid grid-4">
+    <div class="shadow-box" style="box-shadow:var(--shadow-xs)">xs</div>
+    <div class="shadow-box" style="box-shadow:var(--shadow-sm)">sm</div>
+    <div class="shadow-box" style="box-shadow:var(--shadow-md)">md</div>
+    <div class="shadow-box" style="box-shadow:var(--shadow-lg)">lg</div>
+  </div>
+
+  <!-- Buttons -->
+  <h2>6. 按钮 / Button</h2>
+  <h3>变体 Variant</h3>
+  <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:24px">
+    <button class="btn btn-primary">主要 Primary</button>
+    <button class="btn btn-secondary">次要 Secondary</button>
+    <button class="btn btn-ghost">幽灵 Ghost</button>
+    <button class="btn btn-danger">危险 Danger</button>
+    <button class="btn btn-text">文字 Text</button>
+    <button class="btn btn-primary" disabled>禁用</button>
+  </div>
+  <h3>尺寸 Size</h3>
+  <div style="display:flex;gap:12px;align-items:center;margin-bottom:24px">
+    <button class="btn btn-primary btn-sm">小号 32</button>
+    <button class="btn btn-primary">中号 40</button>
+    <button class="btn btn-primary btn-lg">大号 48</button>
+  </div>
+
+  <!-- Inputs -->
+  <h2>7. 输入框 / Input</h2>
+  <div class="grid grid-2">
+    <div class="field">
+      <label>用户名 <span class="req">*</span></label>
+      <input class="input" placeholder="请输入用户名" value="alice">
+    </div>
+    <div class="field">
+      <label>邮箱</label>
+      <input class="input" placeholder="name@example.com">
+    </div>
+    <div class="field">
+      <label>密码 <span class="req">*</span></label>
+      <input class="input err" type="password" value="123">
+      <span class="err-msg">密码至少 8 位，且需含字母与数字</span>
+    </div>
+    <div class="field">
+      <label>账本名称</label>
+      <input class="input" placeholder="如：日常账本">
+    </div>
+  </div>
+
+  <!-- Tags -->
+  <h2>8. 标签 / Tag</h2>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <span class="tag tag-default">默认</span>
+    <span class="tag tag-income">收入</span>
+    <span class="tag tag-expense">支出</span>
+    <span class="tag tag-warn">预警</span>
+  </div>
+
+  <!-- Table -->
+  <h2>9. 表格 / Table</h2>
+  <table>
+    <thead><tr><th>日期</th><th>类型</th><th>分类</th><th>备注</th><th style="text-align:right">金额</th></tr></thead>
+    <tbody>
+      <tr><td>2026-06-15</td><td><span class="tag tag-expense">支出</span></td><td>餐饮</td><td>午餐</td><td class="num expense">-¥38.00</td></tr>
+      <tr><td>2026-06-15</td><td><span class="tag tag-income">收入</span></td><td>工资</td><td>6 月薪资</td><td class="num income">+¥12,500.00</td></tr>
+      <tr><td>2026-06-14</td><td><span class="tag tag-expense">支出</span></td><td>交通</td><td>地铁</td><td class="num expense">-¥6.00</td></tr>
+    </tbody>
+  </table>
+
+  <!-- Card -->
+  <h2>10. 卡片 / Card</h2>
+  <div class="grid grid-3">
+    <div class="card">
+      <div class="card-title">本月支出</div>
+      <p style="font-size:var(--fs-mono-lg);font-family:'JetBrains Mono',monospace;color:var(--expense-500)">¥ 3,256.80</p>
+      <p style="color:var(--text-tertiary);font-size:var(--fs-caption);margin-top:8px">较上月 +12.4%</p>
+    </div>
+    <div class="card">
+      <div class="card-title">本月收入</div>
+      <p style="font-size:var(--fs-mono-lg);font-family:'JetBrains Mono',monospace;color:var(--income-500)">¥ 12,500.00</p>
+      <p style="color:var(--text-tertiary);font-size:var(--fs-caption);margin-top:8px">较上月 +0.0%</p>
+    </div>
+    <div class="card">
+      <div class="card-title">本月结余</div>
+      <p style="font-size:var(--fs-mono-lg);font-family:'JetBrains Mono',monospace">¥ 9,243.20</p>
+      <p style="color:var(--text-tertiary);font-size:var(--fs-caption);margin-top:8px">健康</p>
+    </div>
+  </div>
+
+  <p class="sub" style="margin-top:64px">© 2026 个人记账 · v1.0 · 仅展示设计 Token，请勿作为真实业务数据</p>
+</body>
+</html>

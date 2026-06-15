@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>个人设置 · 个人记账</title>
+<link rel="stylesheet" href="assets/app.css">
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand"><div class="logo">记</div><span>个人记账</span></div>
+    <nav class="nav">
+      <div class="nav-section">
+        <div class="nav-title">主导航</div>
+        <a class="nav-item" href="books.html"><span class="icon">📒</span>账本</a>
+        <a class="nav-item" href="transactions.html"><span class="icon">📋</span>收支明细</a>
+        <a class="nav-item" href="transaction-new.html"><span class="icon">✏️</span>快速录入</a>
+        <a class="nav-item" href="categories.html"><span class="icon">🏷️</span>分类管理</a>
+        <a class="nav-item" href="budgets.html"><span class="icon">🎯</span>月度预算</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-title">报表</div>
+        <a class="nav-item" href="stats-monthly.html"><span class="icon">📊</span>月度统计</a>
+        <a class="nav-item" href="stats-breakdown.html"><span class="icon">🥧</span>分类占比</a>
+        <a class="nav-item" href="stats-trend.html"><span class="icon">📈</span>收支趋势</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-title">数据</div>
+        <a class="nav-item" href="import-export.html"><span class="icon">📁</span>导入导出</a>
+      </div>
+    </nav>
+    <div class="sidebar-foot">v1.0 · 私有部署</div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="crumb">设置 / <b>个人设置</b></div>
+      <div class="topbar-right">
+        <button class="icon-btn" onclick="toggleTheme()" title="切换主题">🌓</button>
+        <div class="avatar">A</div>
+      </div>
+    </header>
+
+    <div class="content">
+      <div class="page-head">
+        <div>
+          <h1 class="page-title">个人设置</h1>
+          <p class="page-sub">管理账号信息、密码与偏好</p>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab('profile', this)">个人资料</button>
+        <button class="tab" onclick="switchTab('password', this)">修改密码</button>
+        <button class="tab" onclick="switchTab('preferences', this)">偏好</button>
+        <button class="tab" onclick="switchTab('danger', this)">账号安全</button>
+      </div>
+
+      <!-- 个人资料 -->
+      <div class="card" id="tab-profile">
+        <div class="card-head"><div class="card-title">基础资料</div></div>
+        <form id="profileForm" onsubmit="return false;">
+          <div class="card-row c-2">
+            <div class="field">
+              <label>用户名</label>
+              <input class="input" value="alice" disabled>
+              <span class="help">用户名不可修改</span>
+            </div>
+            <div class="field">
+              <label>昵称 <span class="req">*</span></label>
+              <input class="input" name="nickname" value="Alice">
+            </div>
+          </div>
+          <div class="card-row c-2">
+            <div class="field">
+              <label>邮箱</label>
+              <input class="input" value="alice@example.com" disabled>
+            </div>
+            <div class="field">
+              <label>手机号</label>
+              <input class="input" value="138****1234" disabled>
+            </div>
+          </div>
+          <div class="field">
+            <label>个人简介</label>
+            <textarea class="textarea" rows="3" placeholder="选填"></textarea>
+          </div>
+          <div style="display:flex;gap:12px">
+            <button class="btn btn-primary" onclick="toast('资料已保存','success')">保存修改</button>
+            <button class="btn btn-ghost">取消</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- 修改密码 -->
+      <div class="card" id="tab-password" style="display:none">
+        <div class="card-head"><div class="card-title">修改密码</div></div>
+        <form id="pwForm" onsubmit="return false;">
+          <div class="field">
+            <label>当前密码 <span class="req">*</span></label>
+            <input class="input" type="password" name="old">
+            <span class="err-msg" data-for="old"></span>
+          </div>
+          <div class="field">
+            <label>新密码 <span class="req">*</span></label>
+            <input class="input" type="password" name="newp">
+            <span class="help">8-32 位，必须含字母与数字</span>
+            <span class="err-msg" data-for="newp"></span>
+          </div>
+          <div class="field">
+            <label>确认新密码 <span class="req">*</span></label>
+            <input class="input" type="password" name="confirm">
+            <span class="err-msg" data-for="confirm"></span>
+          </div>
+          <div class="alert warn">⚠️ 修改密码后所有 Token 将立即失效，请重新登录</div>
+          <div style="display:flex;gap:12px">
+            <button class="btn btn-primary" onclick="doChangePw()">更新密码</button>
+            <button class="btn btn-ghost">取消</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- 偏好 -->
+      <div class="card" id="tab-preferences" style="display:none">
+        <div class="card-head"><div class="card-title">界面偏好</div></div>
+        <div class="field">
+          <label>主题</label>
+          <div style="display:flex;gap:12px">
+            <label class="radio-row"><input type="radio" name="theme" onchange="document.documentElement.setAttribute('data-theme','light')"> 浅色</label>
+            <label class="radio-row"><input type="radio" name="theme" onchange="document.documentElement.setAttribute('data-theme','dark')"> 暗色</label>
+            <label class="radio-row"><input type="radio" name="theme" checked> 跟随系统</label>
+          </div>
+        </div>
+        <div class="field">
+          <label>默认币种</label>
+          <select class="select" style="width:200px">
+            <option>CNY 人民币</option><option>USD 美元</option><option>EUR 欧元</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>预算预警阈值</label>
+          <input class="input" type="number" value="100" min="0" max="200" style="width:200px">
+          <span class="help">达到该百分比时提醒，默认 100%</span>
+        </div>
+        <button class="btn btn-primary" onclick="toast('偏好已保存','success')">保存偏好</button>
+      </div>
+
+      <!-- 账号安全 -->
+      <div class="card" id="tab-danger" style="display:none">
+        <div class="card-head"><div class="card-title">账号安全</div></div>
+        <div class="alert error">高危操作 · 请谨慎</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 0;border-bottom:1px solid var(--divider)">
+          <div>
+            <div style="font-weight:500">退出所有设备</div>
+            <div class="help" style="margin-top:4px">使当前账号在所有设备上的 Token 失效</div>
+          </div>
+          <button class="btn btn-ghost" onclick="confirm('确定退出所有设备？') && toast('已退出全部设备','success')">退出全部</button>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 0;border-bottom:1px solid var(--divider)">
+          <div>
+            <div style="font-weight:500">导出个人数据</div>
+            <div class="help" style="margin-top:4px">下载您在系统中保存的所有数据副本</div>
+          </div>
+          <button class="btn btn-ghost" onclick="toast('数据导出请求已提交','success')">立即导出</button>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 0">
+          <div>
+            <div style="font-weight:500;color:var(--expense-500)">注销账号</div>
+            <div class="help" style="margin-top:4px">账号注销后所有数据将不可恢复</div>
+          </div>
+          <button class="btn btn-danger" onclick="confirm('确定注销账号？此操作不可恢复') && toast('已发起注销申请','warn')">注销账号</button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+<script src="assets/app.js"></script>
+<script>
+  function switchTab(name, btn) {
+    document.querySelectorAll('[id^="tab-"]').forEach(d => d.style.display = 'none');
+    document.getElementById('tab-' + name).style.display = '';
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+  }
+  function doChangePw() {
+    const ok = validateForm('pwForm', [
+      { name: 'old', label: '当前密码', required: true },
+      { name: 'newp', label: '新密码', required: true, minLen: 8, maxLen: 32, pattern: /(?=.*[A-Za-z])(?=.*\d)/ },
+      { name: 'confirm', label: '确认密码', required: true, equal: 'newp' }
+    ]);
+    if (!ok) return;
+    toast('密码已更新，请重新登录', 'success');
+    setTimeout(() => location.href = 'login.html', 1000);
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,988 @@
+openapi: 3.0.3
+info:
+  title: 个人记账后端 API
+  description: |
+    个人记账系统 REST 接口规范，覆盖账号/账本/分类/收支/预算/统计/导入导出/管理员 8 大域。
+    - 数据格式：JSON（除导出场景）
+    - 时间格式：ISO 8601（`2026-06-15T10:00:00+08:00`）
+    - 金额：字符串返回（避免 JS 精度丢失）
+    - 鉴权：JWT (HS256) · 默认 7 天有效
+  version: 1.0.0
+  contact:
+    name: 个人记账开发组
+    email: dev@personal-jz.dev
+  license:
+    name: Proprietary
+
+servers:
+  - url: https://api.personal-jz.local
+    description: 生产环境
+  - url: http://127.0.0.1:8080
+    description: 本地开发
+
+tags:
+  - name: Auth           账号
+  - name: Book           账本
+  - name: Category       分类
+  - name: Transaction    收支
+  - name: Budget         预算
+  - name: Stats          统计
+  - name: ImportExport   导入导出
+  - name: Admin          管理员
+  - name: Common         公共
+
+# ============================================================
+# 安全：JWT Bearer
+# ============================================================
+security:
+  - bearerAuth: []
+
+# ============================================================
+# 路径
+# ============================================================
+paths:
+  # -------- Auth --------
+  /api/auth/register:
+    post:
+      tags: [Auth]
+      summary: 用户注册
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RegisterRequest' }
+      responses:
+        '200':
+          description: 注册成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data: { $ref: '#/components/schemas/LoginResponse' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /api/auth/login:
+    post:
+      tags: [Auth]
+      summary: 用户登录
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LoginRequest' }
+      responses:
+        '200':
+          description: 登录成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data: { $ref: '#/components/schemas/LoginResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '423': { $ref: '#/components/responses/Locked' }
+
+  /api/auth/logout:
+    post:
+      tags: [Auth]
+      summary: 退出登录
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+
+  /api/auth/me:
+    get:
+      tags: [Auth]
+      summary: 当前用户信息
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data: { $ref: '#/components/schemas/UserVO' }
+
+  /api/auth/password:
+    put:
+      tags: [Auth]
+      summary: 修改密码
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ChangePasswordRequest' }
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/auth/profile:
+    put:
+      tags: [Auth]
+      summary: 修改昵称
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UpdateProfileRequest' }
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+
+  # -------- Book --------
+  /api/books:
+    get:
+      tags: [Book]
+      summary: 账本列表
+      parameters:
+        - in: query
+          name: includeArchived
+          schema: { type: boolean, default: false }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/BookVO' }
+    post:
+      tags: [Book]
+      summary: 创建账本
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateBookRequest' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data: { $ref: '#/components/schemas/BookVO' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /api/books/{id}:
+    get:
+      tags: [Book]
+      summary: 账本详情
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data: { $ref: '#/components/schemas/BookVO' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/books/{id}/switch:
+    post:
+      tags: [Book]
+      summary: 切换当前账本
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+
+  /api/books/{id}/status:
+    put:
+      tags: [Book]
+      summary: 归档/恢复账本
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UpdateBookStatusRequest' }
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+
+  # -------- Category --------
+  /api/categories:
+    get:
+      tags: [Category]
+      summary: 分类列表
+      parameters:
+        - in: query
+          name: bookId
+          required: true
+          schema: { type: integer, format: int64 }
+        - in: query
+          name: type
+          schema: { type: string, enum: [INCOME, EXPENSE, TRANSFER] }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/CategoryVO' }
+    post:
+      tags: [Category]
+      summary: 新增分类
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateCategoryRequest' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data: { $ref: '#/components/schemas/CategoryVO' }
+
+  /api/categories/{id}:
+    put:
+      tags: [Category]
+      summary: 修改分类
+      parameters: [ { $ref: '#/components/parameters/PathId' } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UpdateCategoryRequest' }
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+    delete:
+      tags: [Category]
+      summary: 删除分类
+      parameters: [ { $ref: '#/components/parameters/PathId' } ]
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        '409':
+          description: 分类下存在交易记录
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiResponse' }
+
+  # -------- Transaction --------
+  /api/transactions:
+    get:
+      tags: [Transaction]
+      summary: 收支列表
+      parameters:
+        - { in: query, name: bookId,     required: true, schema: { type: integer, format: int64 } }
+        - { in: query, name: from,       schema: { type: string, format: date-time } }
+        - { in: query, name: to,         schema: { type: string, format: date-time } }
+        - { in: query, name: categoryId, schema: { type: integer, format: int64 } }
+        - { in: query, name: type,       schema: { type: string, enum: [INCOME, EXPENSE, TRANSFER] } }
+        - { in: query, name: q,          schema: { type: string, description: '备注关键字' } }
+        - { in: query, name: page,       schema: { type: integer, minimum: 1, default: 1 } }
+        - { in: query, name: size,       schema: { type: integer, minimum: 1, maximum: 100, default: 20 } }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data: { $ref: '#/components/schemas/PageResponse_Tx' }
+    post:
+      tags: [Transaction]
+      summary: 新增收支
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateTxRequest' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data: { $ref: '#/components/schemas/TxCreatedVO' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+
+  /api/transactions/{id}:
+    get:
+      tags: [Transaction]
+      summary: 收支详情
+      parameters: [ { $ref: '#/components/parameters/PathId' } ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data: { $ref: '#/components/schemas/TxVO' }
+    put:
+      tags: [Transaction]
+      summary: 修改收支
+      parameters: [ { $ref: '#/components/parameters/PathId' } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UpdateTxRequest' }
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+    delete:
+      tags: [Transaction]
+      summary: 删除（软删除）
+      parameters: [ { $ref: '#/components/parameters/PathId' } ]
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+
+  # -------- Budget --------
+  /api/budgets:
+    put:
+      tags: [Budget]
+      summary: 设置/更新月度预算（Upsert）
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UpsertBudgetRequest' }
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+
+  /api/budgets/progress:
+    get:
+      tags: [Budget]
+      summary: 预算执行进度
+      parameters:
+        - { in: query, name: bookId,   required: true, schema: { type: integer, format: int64 } }
+        - { in: query, name: yearMonth, required: true, schema: { type: string, pattern: '^\d{4}-\d{2}$' } }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/BudgetProgressVO' }
+
+  # -------- Stats --------
+  /api/stats/monthly:
+    get:
+      tags: [Stats]
+      summary: 月度收支汇总
+      parameters:
+        - { in: query, name: bookId,   required: true, schema: { type: integer, format: int64 } }
+        - { in: query, name: yearMonth, required: true, schema: { type: string, pattern: '^\d{4}-\d{2}$' } }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data: { $ref: '#/components/schemas/MonthlyStatsVO' }
+
+  /api/stats/category-breakdown:
+    get:
+      tags: [Stats]
+      summary: 分类占比
+      parameters:
+        - { in: query, name: bookId,    required: true, schema: { type: integer, format: int64 } }
+        - { in: query, name: yearMonth, required: true, schema: { type: string, pattern: '^\d{4}-\d{2}$' } }
+        - { in: query, name: type,      schema: { type: string, enum: [INCOME, EXPENSE], default: EXPENSE } }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/CategoryBreakdownVO' }
+
+  /api/stats/trend:
+    get:
+      tags: [Stats]
+      summary: 收支趋势
+      parameters:
+        - { in: query, name: bookId,      required: true, schema: { type: integer, format: int64 } }
+        - { in: query, name: rangeMonths, schema: { type: integer, enum: [6, 12], default: 6 } }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/TrendPointVO' }
+
+  # -------- Import / Export --------
+  /api/exports/template:
+    get:
+      tags: [ImportExport]
+      summary: 下载导入模板
+      parameters:
+        - { in: query, name: bookId, required: true, schema: { type: integer, format: int64 } }
+      responses:
+        '200':
+          description: xlsx 文件流
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema: { type: string, format: binary }
+
+  /api/exports/transactions:
+    get:
+      tags: [ImportExport]
+      summary: 导出收支明细
+      parameters:
+        - { in: query, name: bookId, required: true, schema: { type: integer, format: int64 } }
+        - { in: query, name: from,   required: true, schema: { type: string, format: date } }
+        - { in: query, name: to,     required: true, schema: { type: string, format: date } }
+      responses:
+        '200':
+          description: xlsx 文件流
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema: { type: string, format: binary }
+
+  /api/exports/monthly:
+    get:
+      tags: [ImportExport]
+      summary: 导出月度统计
+      parameters:
+        - { in: query, name: bookId,    required: true, schema: { type: integer, format: int64 } }
+        - { in: query, name: yearMonths, required: true, schema: { type: string, example: '2026-01,2026-02' } }
+      responses:
+        '200':
+          description: xlsx 文件流
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema: { type: string, format: binary }
+
+  /api/imports/transactions:
+    post:
+      tags: [ImportExport]
+      summary: Excel 批量导入
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                bookId: { type: integer, format: int64 }
+                file:   { type: string, format: binary }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data: { $ref: '#/components/schemas/ImportResultVO' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+
+  # -------- Admin --------
+  /api/admin/stats:
+    get:
+      tags: [Admin]
+      summary: 平台规模统计
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data: { $ref: '#/components/schemas/AdminStatsVO' }
+
+  /api/admin/users/{id}/enabled:
+    put:
+      tags: [Admin]
+      summary: 启停账号
+      parameters: [ { $ref: '#/components/parameters/PathId' } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [enabled]
+              properties:
+                enabled: { type: boolean }
+      responses:
+        '200': { $ref: '#/components/responses/Ok' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/admin/audit-logs:
+    get:
+      tags: [Admin]
+      summary: 审计日志查询
+      parameters:
+        - { in: query, name: userId, schema: { type: integer, format: int64 } }
+        - { in: query, name: action, schema: { type: string } }
+        - { in: query, name: from,   schema: { type: string, format: date-time } }
+        - { in: query, name: to,     schema: { type: string, format: date-time } }
+        - { in: query, name: page,   schema: { type: integer, default: 1 } }
+        - { in: query, name: size,   schema: { type: integer, default: 20, maximum: 100 } }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data: { $ref: '#/components/schemas/PageResponse_AuditLog' }
+
+# ============================================================
+# 组件：Schemas / Parameters / Responses / Security
+# ============================================================
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        JWT 鉴权 · HS256 · 默认 7 天有效
+        Header：`Authorization: Bearer <token>`
+
+  parameters:
+    PathId:
+      in: path
+      name: id
+      required: true
+      schema: { type: integer, format: int64 }
+
+  responses:
+    Ok:
+      description: 操作成功
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ApiResponse' }
+    BadRequest:
+      description: 请求参数错误
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ApiResponse' }
+    Unauthorized:
+      description: 未认证 / Token 失效
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ApiResponse' }
+    Forbidden:
+      description: 无权访问
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ApiResponse' }
+    NotFound:
+      description: 资源不存在
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ApiResponse' }
+    Conflict:
+      description: 资源冲突
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ApiResponse' }
+    Locked:
+      description: 账号被锁定
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ApiResponse' }
+
+  schemas:
+    # -------- 公共 --------
+    ApiResponse:
+      type: object
+      properties:
+        code: { type: integer, example: 0, description: '0=成功；非 0=业务错误' }
+        msg:  { type: string,  example: 'ok' }
+        data: { nullable: true }
+        traceId: { type: string, example: '0a1b2c3d4e5f' }
+
+    PageResponse_Tx:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponse'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                list: { type: array, items: { $ref: '#/components/schemas/TxVO' } }
+                page: { type: integer }
+                size: { type: integer }
+                total: { type: integer }
+                hasNext: { type: boolean }
+    PageResponse_AuditLog:
+      type: object
+      properties:
+        list: { type: array, items: { $ref: '#/components/schemas/AuditLogVO' } }
+        page: { type: integer }
+        size: { type: integer }
+        total: { type: integer }
+
+    # -------- 账号 --------
+    RegisterRequest:
+      type: object
+      required: [username, password, email]
+      properties:
+        username: { type: string, minLength: 4, maxLength: 20, pattern: '^[A-Za-z0-9_]+$' }
+        nickname: { type: string, maxLength: 16 }
+        email:    { type: string, format: email }
+        phone:    { type: string, pattern: '^1[3-9]\d{9}$' }
+        password: { type: string, minLength: 8, maxLength: 32, pattern: '(?=.*[A-Za-z])(?=.*\d)' }
+
+    LoginRequest:
+      type: object
+      required: [account, password]
+      properties:
+        account:  { type: string, description: '用户名/邮箱/手机号' }
+        password: { type: string, format: password }
+
+    LoginResponse:
+      type: object
+      properties:
+        token:     { type: string }
+        expiresAt: { type: string, format: date-time }
+        user:      { $ref: '#/components/schemas/UserVO' }
+
+    UserVO:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        username: { type: string }
+        nickname: { type: string }
+        email: { type: string }
+        phone: { type: string }
+        role: { type: string, enum: [USER, ADMIN] }
+        enabled: { type: boolean }
+        currentBookId: { type: integer, format: int64, nullable: true }
+        createdAt: { type: string, format: date-time }
+
+    ChangePasswordRequest:
+      type: object
+      required: [oldPassword, newPassword]
+      properties:
+        oldPassword: { type: string, format: password }
+        newPassword: { type: string, minLength: 8, maxLength: 32, pattern: '(?=.*[A-Za-z])(?=.*\d)' }
+
+    UpdateProfileRequest:
+      type: object
+      required: [nickname]
+      properties:
+        nickname: { type: string, minLength: 1, maxLength: 16 }
+
+    # -------- 账本 --------
+    CreateBookRequest:
+      type: object
+      required: [name]
+      properties:
+        name:     { type: string, minLength: 1, maxLength: 20 }
+        currency: { type: string, enum: [CNY, USD, EUR], default: CNY }
+        icon:     { type: string, maxLength: 16 }
+
+    UpdateBookStatusRequest:
+      type: object
+      required: [status]
+      properties:
+        status: { type: string, enum: [ACTIVE, ARCHIVED] }
+
+    BookVO:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        name: { type: string }
+        currency: { type: string }
+        icon: { type: string, nullable: true }
+        status: { type: string, enum: [ACTIVE, ARCHIVED] }
+        createdAt: { type: string, format: date-time }
+
+    # -------- 分类 --------
+    CreateCategoryRequest:
+      type: object
+      required: [bookId, name, type]
+      properties:
+        bookId: { type: integer, format: int64 }
+        name:   { type: string, minLength: 1, maxLength: 20 }
+        type:   { type: string, enum: [INCOME, EXPENSE, TRANSFER] }
+        icon:   { type: string, maxLength: 16 }
+        color:  { type: string, pattern: '^#[0-9A-Fa-f]{6}$' }
+        sortOrder: { type: integer, default: 0 }
+
+    UpdateCategoryRequest:
+      type: object
+      properties:
+        name: { type: string, minLength: 1, maxLength: 20 }
+        icon: { type: string, maxLength: 16 }
+        color: { type: string, pattern: '^#[0-9A-Fa-f]{6}$' }
+        sortOrder: { type: integer }
+
+    CategoryVO:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        bookId: { type: integer, format: int64, nullable: true }
+        name: { type: string }
+        type: { type: string, enum: [INCOME, EXPENSE, TRANSFER] }
+        icon: { type: string, nullable: true }
+        color: { type: string, nullable: true }
+        isSystem: { type: boolean }
+        sortOrder: { type: integer }
+
+    # -------- 收支 --------
+    CreateTxRequest:
+      type: object
+      required: [bookId, categoryId, type, amount, occurredAt]
+      properties:
+        bookId:     { type: integer, format: int64 }
+        categoryId: { type: integer, format: int64 }
+        type:       { type: string, enum: [INCOME, EXPENSE, TRANSFER] }
+        amount:     { type: string, description: '字符串金额，如 "38.00"', pattern: '^\d{1,7}(\.\d{1,2})?$' }
+        payMethod:  { type: string, enum: [CASH, ALIPAY, WECHAT, BANK_CARD, CREDIT_CARD, OTHER], default: CASH }
+        occurredAt: { type: string, format: date-time }
+        remark:     { type: string, maxLength: 200 }
+
+    UpdateTxRequest:
+      type: object
+      properties:
+        categoryId: { type: integer, format: int64 }
+        amount:     { type: string, pattern: '^\d{1,7}(\.\d{1,2})?$' }
+        payMethod:  { type: string, enum: [CASH, ALIPAY, WECHAT, BANK_CARD, CREDIT_CARD, OTHER] }
+        occurredAt: { type: string, format: date-time }
+        remark:     { type: string, maxLength: 200 }
+
+    TxVO:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        bookId: { type: integer, format: int64 }
+        categoryId: { type: integer, format: int64 }
+        categoryName: { type: string }
+        type: { type: string, enum: [INCOME, EXPENSE, TRANSFER] }
+        amount: { type: string, example: '38.00' }
+        payMethod: { type: string }
+        occurredAt: { type: string, format: date-time }
+        remark: { type: string, nullable: true }
+        createdAt: { type: string, format: date-time }
+
+    TxCreatedVO:
+      allOf:
+        - $ref: '#/components/schemas/TxVO'
+        - type: object
+          properties:
+            overBudgetWarning: { type: boolean, example: false }
+
+    # -------- 预算 --------
+    UpsertBudgetRequest:
+      type: object
+      required: [bookId, categoryId, yearMonth, amount]
+      properties:
+        bookId:        { type: integer, format: int64 }
+        categoryId:    { type: integer, format: int64 }
+        yearMonth:     { type: string, pattern: '^\d{4}-\d{2}$' }
+        amount:        { type: string, pattern: '^\d{1,7}(\.\d{1,2})?$' }
+        warnThreshold: { type: number, minimum: 0, maximum: 2, default: 1.0 }
+
+    BudgetProgressVO:
+      type: object
+      properties:
+        categoryId: { type: integer, format: int64 }
+        categoryName: { type: string }
+        budget: { type: string, nullable: true, example: '800.00' }
+        used:   { type: string, example: '820.00' }
+        progress: { type: number, nullable: true, example: 102.5, description: '百分比；未设置预算时为 null' }
+        status: { type: string, enum: [NORMAL, WARN, OVER] }
+
+    # -------- 统计 --------
+    MonthlyStatsVO:
+      type: object
+      properties:
+        yearMonth:  { type: string, example: '2026-06' }
+        income:     { type: string, example: '13000.00' }
+        expense:    { type: string, example: '3256.80' }
+        balance:    { type: string, example: '9743.20' }
+        savingsRate: { type: number, example: 74.9 }
+
+    CategoryBreakdownVO:
+      type: object
+      properties:
+        categoryId: { type: integer, format: int64, nullable: true, description: 'null=其他合并' }
+        name: { type: string }
+        amount: { type: string }
+        percentage: { type: number, example: 25.2 }
+        isOther: { type: boolean }
+
+    TrendPointVO:
+      type: object
+      properties:
+        yearMonth: { type: string, example: '2026-06' }
+        income:    { type: string }
+        expense:   { type: string }
+        balance:   { type: string }
+
+    # -------- 导入导出 --------
+    ImportResultVO:
+      type: object
+      properties:
+        success: { type: integer, example: 412 }
+        failed:
+          type: array
+          items:
+            type: object
+            properties:
+              row: { type: integer }
+              col: { type: string, example: '分类名' }
+              msg: { type: string, example: '当前账本不存在该分类' }
+              value: { type: string, nullable: true }
+
+    # -------- 管理员 --------
+    AdminStatsVO:
+      type: object
+      properties:
+        userCount:      { type: integer }
+        bookCount:      { type: integer }
+        txCount:        { type: integer }
+        activeUserCount: { type: integer, description: '近 7 日活跃' }
+
+    AuditLogVO:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        userId: { type: integer, format: int64, nullable: true }
+        action: { type: string }
+        targetType: { type: string, nullable: true }
+        targetId: { type: integer, format: int64, nullable: true }
+        ip: { type: string, nullable: true }
+        result: { type: string, enum: [SUCCESS, FAILURE] }
+        detail: { type: object, nullable: true, additionalProperties: true }
+        createdAt: { type: string, format: date-time }
+
+# ============================================================
+# 全局错误码（业务错误码统一收敛到 data 字段之外的顶层 code）
+# ============================================================
+x-error-codes:
+  - { code: 0,        message: OK }
+  # 账号
+  - { code: 10001,    message: INVALID_USERNAME }
+  - { code: 10002,    message: WEAK_PASSWORD }
+  - { code: 10003,    message: INVALID_CONTACT }
+  - { code: 10004,    message: PASSWORD_MISMATCH }
+  - { code: 10005,    message: USERNAME_TAKEN }
+  - { code: 10006,    message: INVALID_CREDENTIALS }
+  - { code: 10007,    message: ACCOUNT_DISABLED }
+  - { code: 10008,    message: ACCOUNT_LOCKED, statusCode: 423 }
+  - { code: 10009,    message: TOKEN_MISSING,  statusCode: 401 }
+  - { code: 10010,    message: TOKEN_EXPIRED,  statusCode: 401 }
+  - { code: 10011,    message: TOKEN_INVALID,  statusCode: 401 }
+  - { code: 10012,    message: TOKEN_REVOKED,  statusCode: 401 }
+  - { code: 10013,    message: WRONG_OLD_PASSWORD }
+  - { code: 10014,    message: SAME_PASSWORD }
+  # 账本
+  - { code: 20001,    message: BOOK_NAME_TAKEN }
+  - { code: 20002,    message: BOOK_LIMIT_REACHED }
+  - { code: 20003,    message: LAST_ACTIVE_BOOK }
+  - { code: 20004,    message: BOOK_ARCHIVED }
+  - { code: 20005,    message: UNSUPPORTED_CURRENCY }
+  # 分类
+  - { code: 30001,    message: CATEGORY_NOT_FOUND }
+  - { code: 30002,    message: CATEGORY_TYPE_MISMATCH }
+  - { code: 30003,    message: CATEGORY_NAME_TAKEN }
+  - { code: 30004,    message: CATEGORY_LIMIT_REACHED }
+  - { code: 30005,    message: SYSTEM_CATEGORY_READONLY }
+  - { code: 30006,    message: CATEGORY_IN_USE }
+  # 收支
+  - { code: 40001,    message: INVALID_AMOUNT }
+  - { code: 40002,    message: DATE_OUT_OF_RANGE }
+  - { code: 40003,    message: TX_NOT_FOUND }
+  - { code: 40004,    message: INVALID_PAY_METHOD }
+  # 预算
+  - { code: 50001,    message: INVALID_MONTH }
+  - { code: 50002,    message: BUDGET_ON_INCOME }
+  # 导入导出
+  - { code: 60001,    message: FILE_TOO_LARGE }
+  - { code: 60002,    message: ROW_LIMIT }
+  - { code: 60003,    message: UNSUPPORTED_FILE_TYPE }
+  - { code: 60004,    message: INVALID_HEADER }
+  - { code: 60005,    message: FORMULA_INJECTION }
+  - { code: 60006,    message: RANGE_TOO_LONG }
+  # 公共
+  - { code: 70001,    message: PARAM_INVALID,        statusCode: 400 }
+  - { code: 70002,    message: UNAUTHORIZED,         statusCode: 401 }
+  - { code: 70003,    message: FORBIDDEN,            statusCode: 403 }
+  - { code: 70004,    message: NOT_FOUND,            statusCode: 404 }
+  - { code: 70005,    message: CONFLICT,             statusCode: 409 }
+  - { code: 70006,    message: RATE_LIMITED,         statusCode: 429 }
+  - { code: 70007,    message: INTERNAL_ERROR,       statusCode: 500 }
+  # 管理员
+  - { code: 80001,    message: CANNOT_DISABLE_SELF }
+  - { code: 80002,    message: TARGET_USER_NOT_FOUND }

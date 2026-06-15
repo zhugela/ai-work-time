@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>注册 · 个人记账</title>
+<link rel="stylesheet" href="assets/app.css">
+</head>
+<body>
+<div class="auth-page">
+  <div class="auth-card" style="width:480px">
+    <div class="brand">
+      <div class="logo">记</div>
+      <h1>注册 · 个人记账</h1>
+    </div>
+    <form id="regForm" onsubmit="return false;">
+      <div class="card-row c-2">
+        <div class="field">
+          <label>用户名 <span class="req">*</span></label>
+          <input class="input" name="username" placeholder="4-20 位字母/数字">
+          <span class="err-msg" data-for="username"></span>
+        </div>
+        <div class="field">
+          <label>昵称</label>
+          <input class="input" name="nickname" placeholder="选填，1-16 字">
+        </div>
+      </div>
+      <div class="field">
+        <label>邮箱 <span class="req">*</span></label>
+        <input class="input" name="email" placeholder="name@example.com">
+        <span class="err-msg" data-for="email"></span>
+      </div>
+      <div class="field">
+        <label>手机号</label>
+        <input class="input" name="phone" placeholder="选填，11 位手机号">
+        <span class="err-msg" data-for="phone"></span>
+      </div>
+      <div class="card-row c-2">
+        <div class="field">
+          <label>密码 <span class="req">*</span></label>
+          <input class="input" name="password" type="password" placeholder="8-32 位，含字母+数字">
+          <span class="err-msg" data-for="password"></span>
+        </div>
+        <div class="field">
+          <label>确认密码 <span class="req">*</span></label>
+          <input class="input" name="confirm" type="password" placeholder="再次输入密码">
+          <span class="err-msg" data-for="confirm"></span>
+        </div>
+      </div>
+      <div class="field">
+        <label class="checkbox-row" style="font-weight:400">
+          <input type="checkbox" checked> 我已阅读并同意 <a href="#">《用户协议》</a> 与 <a href="#">《隐私政策》</a>
+        </label>
+      </div>
+      <button class="btn btn-primary btn-lg btn-block" onclick="doRegister()">注 册</button>
+      <p class="tip" style="margin-top:16px;text-align:center;color:var(--text-tertiary);font-size:var(--fs-caption)">
+        已有账号？<a href="login.html">直接登录</a>
+      </p>
+    </form>
+  </div>
+</div>
+<script src="assets/app.js"></script>
+<script>
+  function doRegister() {
+    const ok = validateForm('regForm', [
+      { name: 'username', label: '用户名', required: true, minLen: 4, maxLen: 20, pattern: /^[A-Za-z0-9_]+$/ },
+      { name: 'email', label: '邮箱', required: true, pattern: /^[\w.+-]+@[\w-]+\.[\w.-]+$/ },
+      { name: 'phone', label: '手机号', pattern: /^1[3-9]\d{9}$/ },
+      { name: 'password', label: '密码', required: true, minLen: 8, maxLen: 32, pattern: /(?=.*[A-Za-z])(?=.*\d)/ },
+      { name: 'confirm', label: '确认密码', required: true, equal: 'password' }
+    ]);
+    if (!ok) return;
+    toast('注册成功，请登录', 'success');
+    setTimeout(() => location.href = 'login.html', 800);
+  }
+</script>
+</body>
+</html>

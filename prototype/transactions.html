@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>收支明细 · 个人记账</title>
+<link rel="stylesheet" href="assets/app.css">
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand"><div class="logo">记</div><span>个人记账</span></div>
+    <nav class="nav">
+      <div class="nav-section">
+        <div class="nav-title">主导航</div>
+        <a class="nav-item" href="books.html"><span class="icon">📒</span>账本</a>
+        <a class="nav-item" href="transactions.html"><span class="icon">📋</span>收支明细</a>
+        <a class="nav-item" href="transaction-new.html"><span class="icon">✏️</span>快速录入</a>
+        <a class="nav-item" href="categories.html"><span class="icon">🏷️</span>分类管理</a>
+        <a class="nav-item" href="budgets.html"><span class="icon">🎯</span>月度预算</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-title">报表</div>
+        <a class="nav-item" href="stats-monthly.html"><span class="icon">📊</span>月度统计</a>
+        <a class="nav-item" href="stats-breakdown.html"><span class="icon">🥧</span>分类占比</a>
+        <a class="nav-item" href="stats-trend.html"><span class="icon">📈</span>收支趋势</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-title">数据</div>
+        <a class="nav-item" href="import-export.html"><span class="icon">📁</span>导入导出</a>
+      </div>
+    </nav>
+    <div class="sidebar-foot">v1.0 · 私有部署</div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="crumb">日常账本 / <b>收支明细</b></div>
+      <div class="topbar-right">
+        <div class="book-switcher"><span>🏠</span><span class="name">日常账本</span><span style="color:var(--text-tertiary)">▾</span></div>
+        <button class="icon-btn" onclick="toggleTheme()">🌓</button>
+        <a href="settings.html" style="text-decoration:none"><div class="avatar">A</div></a>
+      </div>
+    </header>
+
+    <div class="content">
+      <div class="page-head">
+        <div>
+          <h1 class="page-title">收支明细</h1>
+          <p class="page-sub">2026-06-01 ~ 2026-06-15 · 共 28 笔</p>
+        </div>
+        <div style="display:flex;gap:12px">
+          <a href="transaction-new.html" class="btn btn-primary">+ 快速录入</a>
+          <a href="import-export.html" class="btn btn-ghost">导出 Excel</a>
+        </div>
+      </div>
+
+      <!-- 筛选 -->
+      <div class="filter-bar">
+        <input class="input" type="date" value="2026-06-01">
+        <span>至</span>
+        <input class="input" type="date" value="2026-06-15">
+        <select class="select"><option>全部分类</option><option>餐饮</option><option>交通</option><option>购物</option></select>
+        <select class="select"><option>全部类型</option><option>支出</option><option>收入</option></select>
+        <input class="input" placeholder="🔍 搜索备注…" style="width:200px">
+        <button class="btn btn-ghost btn-sm" onclick="toast('已重置筛选','info')">重置</button>
+      </div>
+
+      <!-- 列表 -->
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>日期</th><th>类型</th><th>分类</th><th>支付方式</th><th>备注</th><th class="num">金额</th><th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>2026-06-15 12:34</td>
+              <td><span class="tag tag-expense">支出</span></td>
+              <td>🍔 餐饮</td>
+              <td>支付宝</td>
+              <td>午餐 - 黄焖鸡</td>
+              <td class="num expense-c">-¥38.00</td>
+              <td><button class="btn btn-sm btn-ghost">编辑</button><button class="btn btn-sm btn-text" style="color:var(--expense-500)">删除</button></td>
+            </tr>
+            <tr>
+              <td>2026-06-15 09:00</td>
+              <td><span class="tag tag-income">收入</span></td>
+              <td>💰 工资</td>
+              <td>—</td>
+              <td>6 月薪资</td>
+              <td class="num income-c">+¥12,500.00</td>
+              <td><button class="btn btn-sm btn-ghost">编辑</button><button class="btn btn-sm btn-text" style="color:var(--expense-500)">删除</button></td>
+            </tr>
+            <tr>
+              <td>2026-06-14 19:20</td>
+              <td><span class="tag tag-expense">支出</span></td>
+              <td>🛒 购物</td>
+              <td>微信</td>
+              <td>超市日用品</td>
+              <td class="num expense-c">-¥156.50</td>
+              <td><button class="btn btn-sm btn-ghost">编辑</button><button class="btn btn-sm btn-text" style="color:var(--expense-500)">删除</button></td>
+            </tr>
+            <tr>
+              <td>2026-06-14 08:15</td>
+              <td><span class="tag tag-expense">支出</span></td>
+              <td>🚇 交通</td>
+              <td>支付宝</td>
+              <td>地铁通勤</td>
+              <td class="num expense-c">-¥6.00</td>
+              <td><button class="btn btn-sm btn-ghost">编辑</button><button class="btn btn-sm btn-text" style="color:var(--expense-500)">删除</button></td>
+            </tr>
+            <tr>
+              <td>2026-06-13 19:00</td>
+              <td><span class="tag tag-expense">支出</span></td>
+              <td>🍔 餐饮</td>
+              <td>现金</td>
+              <td>晚餐外卖</td>
+              <td class="num expense-c">-¥42.00</td>
+              <td><button class="btn btn-sm btn-ghost">编辑</button><button class="btn btn-sm btn-text" style="color:var(--expense-500)">删除</button></td>
+            </tr>
+            <tr>
+              <td>2026-06-12 14:30</td>
+              <td><span class="tag tag-expense">支出</span></td>
+              <td>🎮 娱乐</td>
+              <td>支付宝</td>
+              <td>电影票</td>
+              <td class="num expense-c">-¥80.00</td>
+              <td><button class="btn btn-sm btn-ghost">编辑</button><button class="btn btn-sm btn-text" style="color:var(--expense-500)">删除</button></td>
+            </tr>
+            <tr>
+              <td>2026-06-10 10:00</td>
+              <td><span class="tag tag-income">收入</span></td>
+              <td>💼 兼职</td>
+              <td>—</td>
+              <td>技术文章稿费</td>
+              <td class="num income-c">+¥500.00</td>
+              <td><button class="btn btn-sm btn-ghost">编辑</button><button class="btn btn-sm btn-text" style="color:var(--expense-500)">删除</button></td>
+            </tr>
+            <tr>
+              <td>2026-06-08 20:00</td>
+              <td><span class="tag tag-expense">支出</span></td>
+              <td>🏠 居家</td>
+              <td>银行卡</td>
+              <td>电费 5 月</td>
+              <td class="num expense-c">-¥120.00</td>
+              <td><button class="btn btn-sm btn-ghost">编辑</button><button class="btn btn-sm btn-text" style="color:var(--expense-500)">删除</button></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="pager">
+          <div>共 28 条 · 当前 1-8</div>
+          <div class="pager-right">
+            <select class="select" style="width:90px;height:32px"><option>20 条/页</option><option>50 条/页</option><option>100 条/页</option></select>
+            <button class="btn btn-sm btn-ghost">‹</button>
+            <span>1 / 4</span>
+            <button class="btn btn-sm btn-ghost">›</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+<script src="assets/app.js"></script>
+</body>
+</html>

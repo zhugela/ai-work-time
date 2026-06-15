@@ -1,0 +1,45 @@
+# === 编译产物 ===
+target/
+build/
+*.class
+*.jar
+*.war
+*.log
+
+# === IDE ===
+.idea/
+*.iml
+.vscode/
+.project
+.classpath
+.settings/
+
+# === Spring Boot ===
+HELP.md
+application-*.yml
+!application-dev.yml
+!application-prod.yml
+
+# === 数据库 ===
+*.db
+*.sqlite
+*.sqlite3
+account_book.db
+
+# === 临时与缓存 ===
+.playwright-mcp/
+.tmp/
+*.bak
+*.swp
+.DS_Store
+Thumbs.db
+
+# === 截图（原型已交付，迭代时再生） ===
+prototype/screenshots/
+
+# === 敏感 ===
+.env
+.env.*
+*.pem
+*.key
+secrets/

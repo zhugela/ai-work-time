@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>导入导出 · 个人记账</title>
+<link rel="stylesheet" href="assets/app.css">
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand"><div class="logo">记</div><span>个人记账</span></div>
+    <nav class="nav">
+      <div class="nav-section">
+        <div class="nav-title">主导航</div>
+        <a class="nav-item" href="books.html"><span class="icon">📒</span>账本</a>
+        <a class="nav-item" href="transactions.html"><span class="icon">📋</span>收支明细</a>
+        <a class="nav-item" href="transaction-new.html"><span class="icon">✏️</span>快速录入</a>
+        <a class="nav-item" href="categories.html"><span class="icon">🏷️</span>分类管理</a>
+        <a class="nav-item" href="budgets.html"><span class="icon">🎯</span>月度预算</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-title">报表</div>
+        <a class="nav-item" href="stats-monthly.html"><span class="icon">📊</span>月度统计</a>
+        <a class="nav-item" href="stats-breakdown.html"><span class="icon">🥧</span>分类占比</a>
+        <a class="nav-item" href="stats-trend.html"><span class="icon">📈</span>收支趋势</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-title">数据</div>
+        <a class="nav-item" href="import-export.html"><span class="icon">📁</span>导入导出</a>
+      </div>
+    </nav>
+    <div class="sidebar-foot">v1.0 · 私有部署</div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="crumb">日常账本 / <b>导入导出</b></div>
+      <div class="topbar-right">
+        <div class="book-switcher"><span>🏠</span><span class="name">日常账本</span><span style="color:var(--text-tertiary)">▾</span></div>
+        <button class="icon-btn" onclick="toggleTheme()">🌓</button>
+        <a href="settings.html" style="text-decoration:none"><div class="avatar">A</div></a>
+      </div>
+    </header>
+
+    <div class="content">
+      <div class="page-head">
+        <div>
+          <h1 class="page-title">数据导入导出</h1>
+          <p class="page-sub">私有部署 · 数据 100% 自主</p>
+        </div>
+      </div>
+
+      <div class="card-row c-2">
+        <!-- 导出 -->
+        <div class="card">
+          <div class="card-head"><div class="card-title">📤 导出数据</div></div>
+
+          <div class="field">
+            <label>导出类型</label>
+            <div class="type-tabs" style="width:100%">
+              <button class="type-tab active" style="flex:1">收支明细</button>
+              <button class="type-tab" style="flex:1">月度报表</button>
+              <button class="type-tab" style="flex:1">分类清单</button>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>日期范围</label>
+            <div style="display:flex;gap:8px;align-items:center">
+              <input class="input" type="date" value="2026-01-01" style="flex:1">
+              <span>至</span>
+              <input class="input" type="date" value="2026-06-15" style="flex:1">
+            </div>
+            <span class="help">单次跨度不超过 1 年</span>
+          </div>
+
+          <div class="alert info">ℹ️ 导出文件格式为 .xlsx，0 条记录时仅包含表头</div>
+
+          <button class="btn btn-primary btn-block" onclick="exportExcel()">下载 Excel</button>
+        </div>
+
+        <!-- 导入 -->
+        <div class="card">
+          <div class="card-head"><div class="card-title">📥 导入数据</div></div>
+
+          <div class="upload-area" id="uploadArea">
+            <div class="icon">📄</div>
+            <div style="font-weight:500;margin-bottom:4px">点击或拖拽 Excel 文件至此处</div>
+            <div class="help" style="margin-bottom:12px">支持 .xlsx 格式，文件 ≤ 5MB，行数 ≤ 5000</div>
+            <button class="btn btn-ghost btn-sm" onclick="document.getElementById('fileInput').click()">选择文件</button>
+            <input type="file" id="fileInput" style="display:none" accept=".xlsx">
+          </div>
+
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;padding-top:16px;border-top:1px solid var(--divider)">
+            <div style="font-size:var(--fs-body-sm);color:var(--text-secondary)">没有模板？</div>
+            <button class="btn btn-ghost btn-sm" onclick="downloadTemplate()">下载导入模板</button>
+          </div>
+
+          <div class="alert warn" style="margin-top:16px">
+            ⚠️ <b>导入前请确保：</b><br>
+            · 表头为「日期 / 金额 / 类型 / 分类名 / 支付方式 / 备注」<br>
+            · 分类名必须存在于当前账本，否则该行将失败<br>
+            · 不接受 Excel 公式（以 = 开头的单元格）
+          </div>
+        </div>
+      </div>
+
+      <!-- 历史记录 -->
+      <div class="card" style="margin-top:24px">
+        <div class="card-head"><div class="card-title">导入/导出历史</div></div>
+        <table>
+          <thead><tr><th>时间</th><th>操作</th><th>范围</th><th>结果</th><th>下载</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>2026-06-15 10:30</td>
+              <td><span class="tag tag-default">导出</span></td>
+              <td>2026-01-01 ~ 2026-06-15</td>
+              <td>成功 · 86 条记录</td>
+              <td><button class="btn btn-sm btn-ghost">下载</button></td>
+            </tr>
+            <tr>
+              <td>2026-06-10 15:20</td>
+              <td><span class="tag tag-warn">导入</span></td>
+              <td>微信账单_2025.xlsx</td>
+              <td>部分成功 · 412/420（8 行分类不存在）</td>
+              <td><button class="btn btn-sm btn-ghost">查看明细</button></td>
+            </tr>
+            <tr>
+              <td>2026-05-28 09:15</td>
+              <td><span class="tag tag-default">导出</span></td>
+              <td>2026-05-01 ~ 2026-05-31 月报</td>
+              <td>成功</td>
+              <td><button class="btn btn-sm btn-ghost">下载</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- 导入预览弹窗 -->
+<div class="modal-mask" id="modal-import-preview">
+  <div class="modal lg">
+    <div class="modal-head"><div class="modal-title">导入预览 · 微信账单_2025.xlsx</div><button class="modal-close" data-close="modal-import-preview">✕</button></div>
+    <div class="modal-body">
+      <div class="card-row c-3" style="margin-bottom:16px">
+        <div class="card"><div class="card-title">总行数</div><div class="stat-num mono">420</div></div>
+        <div class="card"><div class="card-title">可导入</div><div class="stat-num income-c">412</div></div>
+        <div class="card"><div class="card-title">失败行</div><div class="stat-num expense-c">8</div></div>
+      </div>
+
+      <div class="alert error">⚠️ 8 行数据存在错误，请修正后重试或跳过</div>
+
+      <div class="table-wrap" style="max-height:300px;overflow:auto">
+        <table>
+          <thead><tr><th>行号</th><th>问题列</th><th>问题内容</th><th>错误信息</th></tr></thead>
+          <tbody>
+            <tr><td>23</td><td>分类名</td><td>「基金」</td><td>当前账本不存在该分类</td></tr>
+            <tr><td>45</td><td>金额</td><td>「abc」</td><td>金额格式错误</td></tr>
+            <tr><td>89</td><td>日期</td><td>「2026/06/10」</td><td>日期格式应为 YYYY-MM-DD</td></tr>
+            <tr><td>132</td><td>类型</td><td>「转账」</td><td>本期不支持 TRANSFER 类型</td></tr>
+            <tr><td>201</td><td>分类名</td><td>「空」</td><td>分类名不能为空</td></tr>
+            <tr><td>287</td><td>金额</td><td>「-100」</td><td>金额必须大于 0</td></tr>
+            <tr><td>350</td><td>支付方式</td><td>「数字人民币」</td><td>不在枚举范围内</td></tr>
+            <tr><td>412</td><td>公式</td><td>「=SUM(A1:A10)」</td><td>检测到公式注入，已拦截</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" data-close="modal-import-preview">取消</button>
+      <button class="btn btn-primary" onclick="closeModal('modal-import-preview');toast('成功导入 412 条','success')">确认导入 412 条</button>
+    </div>
+  </div>
+</div>
+
+<!-- 导出成功弹窗 -->
+<div class="modal-mask" id="modal-export-success">
+  <div class="modal" style="width:420px">
+    <div class="modal-body" style="text-align:center;padding:32px 24px">
+      <div style="font-size:48px;margin-bottom:12px">✅</div>
+      <div style="font-size:18px;font-weight:600;margin-bottom:8px">导出成功</div>
+      <div class="help" style="margin-bottom:20px">文件已开始下载 · 共 86 条记录</div>
+      <button class="btn btn-primary btn-block" data-close="modal-export-success">完成</button>
+    </div>
+  </div>
+</div>
+
+<script src="assets/app.js"></script>
+<script>
+  // 拖拽
+  const ua = document.getElementById('uploadArea');
+  if (ua) {
+    ['dragover', 'dragenter'].forEach(ev => ua.addEventListener(ev, e => { e.preventDefault(); ua.classList.add('dragover'); }));
+    ['dragleave', 'drop'].forEach(ev => ua.addEventListener(ev, e => { e.preventDefault(); ua.classList.remove('dragover'); }));
+    ua.addEventListener('drop', e => {
+      e.preventDefault();
+      openModal('modal-import-preview');
+    });
+  }
+  document.getElementById('fileInput').addEventListener('change', () => openModal('modal-import-preview'));
+  function exportExcel() { openModal('modal-export-success'); }
+  function downloadTemplate() {
+    toast('模板下载已开始', 'success');
+  }
+</script>
+</body>
+</html>

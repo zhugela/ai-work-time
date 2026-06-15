@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>登录 · 个人记账</title>
+<link rel="stylesheet" href="assets/app.css">
+</head>
+<body>
+<div class="auth-page">
+  <div class="auth-card">
+    <div class="brand">
+      <div class="logo">记</div>
+      <h1>登录 · 个人记账</h1>
+    </div>
+    <form id="loginForm" onsubmit="return false;">
+      <div class="field">
+        <label>账号 <span class="req">*</span></label>
+        <input class="input lg" name="account" placeholder="用户名 / 手机号 / 邮箱" value="alice">
+        <span class="err-msg" data-for="account"></span>
+      </div>
+      <div class="field">
+        <label>密码 <span class="req">*</span></label>
+        <input class="input lg" name="password" type="password" placeholder="请输入密码" value="Pass1234">
+        <span class="err-msg" data-for="password"></span>
+      </div>
+      <div class="row" style="display:flex;justify-content:space-between;align-items:center;margin:8px 0 24px;font-size:var(--fs-body-sm)">
+        <label class="checkbox-row" style="font-weight:400"><input type="checkbox" checked> 记住我</label>
+        <a href="#">忘记密码？</a>
+      </div>
+      <button class="btn btn-primary btn-lg btn-block" onclick="doLogin()">登 录</button>
+      <p class="tip" style="margin-top:16px;text-align:center;color:var(--text-tertiary);font-size:var(--fs-caption)">
+        还没有账号？<a href="register.html">立即注册</a>
+      </p>
+    </form>
+    <p class="brand-tip" style="margin-top:24px;justify-content:center">© 2026 个人记账 · 私有化部署 · 数据自主</p>
+  </div>
+</div>
+<script src="assets/app.js"></script>
+<script>
+  function doLogin() {
+    const ok = validateForm('loginForm', [
+      { name: 'account', label: '账号', required: true, minLen: 1 },
+      { name: 'password', label: '密码', required: true, minLen: 8 }
+    ]);
+    if (!ok) return;
+    toast('登录成功', 'success');
+    setTimeout(() => location.href = 'books.html', 600);
+  }
+</script>
+</body>
+</html>

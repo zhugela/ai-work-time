@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>分类管理 · 个人记账</title>
+<link rel="stylesheet" href="assets/app.css">
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand"><div class="logo">记</div><span>个人记账</span></div>
+    <nav class="nav">
+      <div class="nav-section">
+        <div class="nav-title">主导航</div>
+        <a class="nav-item" href="books.html"><span class="icon">📒</span>账本</a>
+        <a class="nav-item" href="transactions.html"><span class="icon">📋</span>收支明细</a>
+        <a class="nav-item" href="transaction-new.html"><span class="icon">✏️</span>快速录入</a>
+        <a class="nav-item" href="categories.html"><span class="icon">🏷️</span>分类管理</a>
+        <a class="nav-item" href="budgets.html"><span class="icon">🎯</span>月度预算</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-title">报表</div>
+        <a class="nav-item" href="stats-monthly.html"><span class="icon">📊</span>月度统计</a>
+        <a class="nav-item" href="stats-breakdown.html"><span class="icon">🥧</span>分类占比</a>
+        <a class="nav-item" href="stats-trend.html"><span class="icon">📈</span>收支趋势</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-title">数据</div>
+        <a class="nav-item" href="import-export.html"><span class="icon">📁</span>导入导出</a>
+      </div>
+    </nav>
+    <div class="sidebar-foot">v1.0 · 私有部署</div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="crumb">日常账本 / <b>分类管理</b></div>
+      <div class="topbar-right">
+        <div class="book-switcher"><span>🏠</span><span class="name">日常账本</span><span style="color:var(--text-tertiary)">▾</span></div>
+        <button class="icon-btn" onclick="toggleTheme()">🌓</button>
+        <a href="settings.html" style="text-decoration:none"><div class="avatar">A</div></a>
+      </div>
+    </header>
+
+    <div class="content">
+      <div class="page-head">
+        <div>
+          <h1 class="page-title">分类管理</h1>
+          <p class="page-sub">自定义分类让记账更贴合习惯</p>
+        </div>
+        <button class="btn btn-primary" onclick="openModal('modal-cat')">+ 新增分类</button>
+      </div>
+
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab('exp', this)">支出分类 <span class="tag tag-default" style="margin-left:6px">15</span></button>
+        <button class="tab" onclick="switchTab('inc', this)">收入分类 <span class="tag tag-default" style="margin-left:6px">8</span></button>
+      </div>
+
+      <!-- 支出分类 -->
+      <div class="card" id="tab-exp">
+        <div class="cat-row" style="background:var(--n-50);font-size:var(--fs-caption);color:var(--text-tertiary)">
+          <div>系统预置 · 不可删除</div>
+        </div>
+        <div class="cat-row">
+          <div class="cat-info"><span class="emoji">🍔</span><div><div class="name">餐饮</div><div class="type">系统预置</div></div></div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-sm btn-ghost" disabled>编辑</button>
+            <button class="btn btn-sm btn-ghost" disabled>删除</button>
+          </div>
+        </div>
+        <div class="cat-row">
+          <div class="cat-info"><span class="emoji">🚇</span><div><div class="name">交通</div><div class="type">系统预置</div></div></div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-sm btn-ghost" disabled>编辑</button>
+            <button class="btn btn-sm btn-ghost" disabled>删除</button>
+          </div>
+        </div>
+        <div class="cat-row" style="background:var(--n-50);font-size:var(--fs-caption);color:var(--text-tertiary)">
+          <div>自定义分类</div>
+          <span>3 / 100</span>
+        </div>
+        <div class="cat-row">
+          <div class="cat-info"><span class="emoji">🐱</span><div><div class="name">宠物</div><div class="type">自定义 · #FF7A45</div></div></div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-sm btn-ghost" onclick="openModal('modal-cat')">编辑</button>
+            <button class="btn btn-sm btn-text" style="color:var(--expense-500)" onclick="confirm('删除该分类？相关预算将一并删除') && toast('已删除','success')">删除</button>
+          </div>
+        </div>
+        <div class="cat-row">
+          <div class="cat-info"><span class="emoji">💍</span><div><div class="name">婚礼</div><div class="type">自定义 · #F5A524</div></div></div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-sm btn-ghost" onclick="openModal('modal-cat')">编辑</button>
+            <button class="btn btn-sm btn-text" style="color:var(--expense-500)">删除</button>
+          </div>
+        </div>
+        <div class="cat-row">
+          <div class="cat-info"><span class="emoji">🧴</span><div><div class="name">护肤</div><div class="type">自定义 · #E5484D</div></div></div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-sm btn-ghost" onclick="openModal('modal-cat')">编辑</button>
+            <button class="btn btn-sm btn-text" style="color:var(--expense-500)">删除</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 收入分类 -->
+      <div class="card" id="tab-inc" style="display:none">
+        <div class="cat-row" style="background:var(--n-50);font-size:var(--fs-caption);color:var(--text-tertiary)">
+          <div>系统预置</div>
+        </div>
+        <div class="cat-row"><div class="cat-info"><span class="emoji">💰</span><div><div class="name">工资</div><div class="type">系统预置</div></div></div>
+          <div><button class="btn btn-sm btn-ghost" disabled>编辑</button></div></div>
+        <div class="cat-row"><div class="cat-info"><span class="emoji">🎁</span><div><div class="name">红包</div><div class="type">系统预置</div></div></div>
+          <div><button class="btn btn-sm btn-ghost" disabled>编辑</button></div></div>
+        <div class="cat-row"><div class="cat-info"><span class="emoji">📈</span><div><div class="name">投资收益</div><div class="type">系统预置</div></div></div>
+          <div><button class="btn btn-sm btn-ghost" disabled>编辑</button></div></div>
+        <div class="cat-row"><div class="cat-info"><span class="emoji">💼</span><div><div class="name">兼职</div><div class="type">系统预置</div></div></div>
+          <div><button class="btn btn-sm btn-ghost" disabled>编辑</button></div></div>
+        <div class="cat-row" style="background:var(--n-50);font-size:var(--fs-caption);color:var(--text-tertiary)">
+          <div>自定义 · 0 / 100</div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- 新增/编辑分类 弹窗 -->
+<div class="modal-mask" id="modal-cat">
+  <div class="modal">
+    <div class="modal-head"><div class="modal-title">编辑分类</div><button class="modal-close" data-close="modal-cat">✕</button></div>
+    <div class="modal-body">
+      <div class="card-row c-2">
+        <div class="field"><label>类型 <span class="req">*</span></label>
+          <select class="select"><option>支出</option><option>收入</option></select>
+        </div>
+        <div class="field"><label>图标</label>
+          <input class="input" value="🐱" maxlength="2">
+        </div>
+      </div>
+      <div class="field"><label>分类名称 <span class="req">*</span></label>
+        <input class="input" name="cname" placeholder="如：宠物">
+        <span class="err-msg" data-for="cname"></span>
+      </div>
+      <div class="field"><label>颜色（hex）</label>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input type="color" value="#FF7A45" style="width:48px;height:40px;border:1px solid var(--border-default);border-radius:6px">
+          <input class="input" value="#FF7A45" pattern="^#[0-9A-Fa-f]{6}$" style="flex:1">
+        </div>
+      </div>
+      <div class="field"><label>排序</label>
+        <input class="input" type="number" value="0" style="width:120px">
+        <span class="help">数字越大越靠后</span>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" data-close="modal-cat">取消</button>
+      <button class="btn btn-primary" onclick="closeModal('modal-cat');toast('已保存','success')">保存</button>
+    </div>
+  </div>
+</div>
+
+<script src="assets/app.js"></script>
+<script>
+  function switchTab(name, btn) {
+    document.querySelectorAll('[id^="tab-"]').forEach(d => d.style.display = 'none');
+    document.getElementById('tab-' + name).style.display = '';
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+  }
+</script>
+</body>
+</html>

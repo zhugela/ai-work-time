@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>账本 · 个人记账</title>
+<link rel="stylesheet" href="assets/app.css">
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand"><div class="logo">记</div><span>个人记账</span></div>
+    <nav class="nav">
+      <div class="nav-section">
+        <div class="nav-title">主导航</div>
+        <a class="nav-item" href="books.html"><span class="icon">📒</span>账本</a>
+        <a class="nav-item" href="transactions.html"><span class="icon">📋</span>收支明细</a>
+        <a class="nav-item" href="transaction-new.html"><span class="icon">✏️</span>快速录入</a>
+        <a class="nav-item" href="categories.html"><span class="icon">🏷️</span>分类管理</a>
+        <a class="nav-item" href="budgets.html"><span class="icon">🎯</span>月度预算</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-title">报表</div>
+        <a class="nav-item" href="stats-monthly.html"><span class="icon">📊</span>月度统计</a>
+        <a class="nav-item" href="stats-breakdown.html"><span class="icon">🥧</span>分类占比</a>
+        <a class="nav-item" href="stats-trend.html"><span class="icon">📈</span>收支趋势</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-title">数据</div>
+        <a class="nav-item" href="import-export.html"><span class="icon">📁</span>导入导出</a>
+      </div>
+    </nav>
+    <div class="sidebar-foot">v1.0 · 私有部署</div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="crumb"><b>账本列表</b></div>
+      <div class="topbar-right">
+        <div class="book-switcher" onclick="openBookMenu()">
+          <span>📒</span><span class="name">日常账本</span><span style="color:var(--text-tertiary)">▾</span>
+        </div>
+        <button class="icon-btn" onclick="toggleTheme()">🌓</button>
+        <a href="settings.html" style="text-decoration:none"><div class="avatar">A</div></a>
+      </div>
+    </header>
+
+    <div class="content">
+      <div class="page-head">
+        <div>
+          <h1 class="page-title">我的账本</h1>
+          <p class="page-sub">管理多场景账本 · 当前 3 / 上限 50</p>
+        </div>
+        <div style="display:flex;gap:12px">
+          <button class="btn btn-ghost" onclick="openModal('modal-archived')">查看归档</button>
+          <button class="btn btn-primary" onclick="openModal('modal-newbook')">+ 新建账本</button>
+        </div>
+      </div>
+
+      <div class="card-row c-3">
+        <div class="book-card active" onclick="setBook('日常账本')">
+          <div class="book-icon">🏠</div>
+          <div class="book-name">日常账本</div>
+          <div class="book-meta">CNY · 默认账本</div>
+          <div class="book-arch" style="margin-top:12px;display:flex;gap:8px">
+            <span class="tag tag-default">本月 28 笔</span>
+            <span class="tag tag-income">结余 ¥9,243</span>
+          </div>
+        </div>
+        <div class="book-card" onclick="setBook('家庭账本')">
+          <div class="book-icon">👨‍👩‍👧</div>
+          <div class="book-name">家庭账本</div>
+          <div class="book-meta">CNY · 2026-01-12 创建</div>
+          <div class="book-arch" style="margin-top:12px;display:flex;gap:8px">
+            <span class="tag tag-default">本月 12 笔</span>
+            <span class="tag tag-expense">超预算 ¥320</span>
+          </div>
+        </div>
+        <div class="book-card" onclick="setBook('副业账本')">
+          <div class="book-icon">💼</div>
+          <div class="book-name">副业账本</div>
+          <div class="book-meta">CNY · 2026-03-08 创建</div>
+          <div class="book-arch" style="margin-top:12px;display:flex;gap:8px">
+            <span class="tag tag-default">本月 5 笔</span>
+            <span class="tag tag-income">收入 ¥3,200</span>
+          </div>
+        </div>
+      </div>
+
+      <h3 style="margin:32px 0 16px">已归档</h3>
+      <div class="card-row c-3">
+        <div class="book-card" style="opacity:0.6">
+          <div class="book-icon">📦</div>
+          <div class="book-name">2025 出差账本</div>
+          <div class="book-meta">已归档 · 2026-01-01</div>
+          <div class="book-arch" style="margin-top:12px">
+            <button class="btn btn-sm btn-ghost" onclick="event.stopPropagation();confirm('恢复该账本？') && toast('已恢复','success')">恢复</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- 新建账本弹窗 -->
+<div class="modal-mask" id="modal-newbook">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">新建账本</div>
+      <button class="modal-close" data-close="modal-newbook">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label>账本名称 <span class="req">*</span></label>
+        <input class="input" id="nb-name" placeholder="如：日常 / 家庭 / 生意">
+      </div>
+      <div class="card-row c-2">
+        <div class="field">
+          <label>币种</label>
+          <select class="select"><option>CNY 人民币</option><option>USD 美元</option><option>EUR 欧元</option></select>
+        </div>
+        <div class="field">
+          <label>图标</label>
+          <select class="select"><option>🏠 家庭</option><option>💼 工作</option><option>✈️ 旅行</option><option>🛒 购物</option></select>
+        </div>
+      </div>
+      <div class="field">
+        <label>备注</label>
+        <textarea class="textarea" rows="2" placeholder="选填"></textarea>
+      </div>
+      <div class="alert info">ℹ️ 创建后将自动复制系统预置分类到本账本</div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" data-close="modal-newbook">取消</button>
+      <button class="btn btn-primary" onclick="createBook()">创建账本</button>
+    </div>
+  </div>
+</div>
+
+<!-- 账本切换菜单 -->
+<div class="modal-mask" id="modal-bookmenu">
+  <div class="modal" style="width:320px">
+    <div class="modal-head"><div class="modal-title">切换账本</div><button class="modal-close" data-close="modal-bookmenu">✕</button></div>
+    <div class="modal-body" style="padding:0">
+      <div class="cat-row" onclick="setBook('日常账本');closeModal('modal-bookmenu')">🏠 日常账本 <span class="tag tag-income">当前</span></div>
+      <div class="cat-row" onclick="setBook('家庭账本');closeModal('modal-bookmenu')">👨‍👩‍👧 家庭账本</div>
+      <div class="cat-row" onclick="setBook('副业账本');closeModal('modal-bookmenu')">💼 副业账本</div>
+    </div>
+  </div>
+</div>
+
+<!-- 归档列表 -->
+<div class="modal-mask" id="modal-archived">
+  <div class="modal">
+    <div class="modal-head"><div class="modal-title">已归档账本</div><button class="modal-close" data-close="modal-archived">✕</button></div>
+    <div class="modal-body">
+      <div class="cat-row"><div>📦 2025 出差账本 <span class="book-meta" style="margin-left:8px">已归档 2026-01-01</span></div>
+        <button class="btn btn-sm btn-ghost">恢复</button></div>
+    </div>
+  </div>
+</div>
+
+<script src="assets/app.js"></script>
+<script>
+  function openBookMenu() { openModal('modal-bookmenu'); }
+  function createBook() {
+    const n = document.getElementById('nb-name').value.trim();
+    if (!n) { toast('请输入账本名称','error'); return; }
+    closeModal('modal-newbook');
+    toast('账本已创建：' + n,'success');
+  }
+</script>
+</body>
+</html>

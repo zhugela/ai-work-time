@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<title>登录页 · Example · 个人记账</title>
+<meta name="viewport" content="width=1280">
+<link rel="stylesheet" href="../design/preview.html" onerror="this.remove()">
+<style>
+  /* 演示页：内联与 design 保持一致 token */
+  :root {
+    --brand-50:#EEF4FF;--brand-100:#D9E6FF;--brand-300:#7CA6F5;
+    --brand-500:#3B6EE8;--brand-600:#2E5BC6;--brand-700:#1F479F;
+    --n-0:#FFF;--n-50:#F5F7FA;--n-100:#EEF1F6;--n-200:#E1E6EF;--n-300:#C9D1DE;
+    --n-400:#9AA4B5;--n-500:#6B7585;--n-600:#4B5563;--n-700:#374151;--n-800:#1F2937;--n-900:#111827;
+    --income-500:#1FB85B;--expense-500:#E5484D;--warn-500:#F5A524;
+    --bg-page:#F5F7FA;--bg-elevated:#FFF;
+    --border-default:#E1E6EF;--divider:#EEF1F6;
+    --radius-md:8px;--radius-lg:12px;--radius-sm:6px;
+    --shadow-sm:0 1px 3px rgba(15,23,42,0.08);
+    --shadow-md:0 4px 12px rgba(15,23,42,0.08);
+    --fs-body:14px;--fs-body-sm:13px;--fs-caption:12px;--fs-h1:24px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Inter","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+       background:linear-gradient(180deg,#EEF4FF 0%,#F5F7FA 60%);
+       min-height:100vh;display:flex;align-items:center;justify-content:center;color:var(--n-900)}
+  .login-box{background:#FFF;width:400px;padding:40px;border-radius:16px;box-shadow:var(--shadow-md);border:1px solid var(--border-default)}
+  .brand{display:flex;align-items:center;gap:8px;margin-bottom:32px}
+  .logo{width:36px;height:36px;border-radius:8px;background:var(--brand-500);color:#FFF;display:flex;align-items:center;justify-content:center;font-weight:700}
+  h1{font-size:20px;font-weight:600}
+  .field{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
+  label{font-size:var(--fs-body-sm);font-weight:500}
+  .req{color:var(--expense-500);margin-left:2px}
+  .input{height:44px;padding:0 12px;border:1px solid var(--border-default);border-radius:6px;font-size:var(--fs-body);width:100%;font-family:inherit}
+  .input:focus{outline:none;border-color:var(--brand-500);box-shadow:0 0 0 4px var(--brand-100)}
+  .row{display:flex;justify-content:space-between;align-items:center;margin:8px 0 24px;font-size:var(--fs-body-sm)}
+  .row a{color:var(--brand-500);text-decoration:none}
+  .btn{height:48px;width:100%;background:var(--brand-500);color:#FFF;border:none;border-radius:8px;font-size:16px;font-weight:500;cursor:pointer}
+  .btn:hover{background:var(--brand-600)}
+  .tip{margin-top:16px;text-align:center;color:var(--n-500);font-size:var(--fs-caption)}
+  .tip a{color:var(--brand-500);text-decoration:none}
+</style>
+</head>
+<body>
+  <div class="login-box">
+    <div class="brand">
+      <div class="logo">记</div>
+      <h1>登录 · 个人记账</h1>
+    </div>
+    <div class="field">
+      <label>账号 <span class="req">*</span></label>
+      <input class="input" placeholder="请输入用户名/手机号/邮箱" value="alice">
+    </div>
+    <div class="field">
+      <label>密码 <span class="req">*</span></label>
+      <input class="input" type="password" placeholder="请输入密码" value="Pass1234">
+    </div>
+    <div class="row">
+      <label style="display:flex;align-items:center;gap:6px;font-weight:400"><input type="checkbox" checked> 记住我</label>
+      <a href="#">忘记密码？</a>
+    </div>
+    <button class="btn">登 录</button>
+    <p class="tip">还没有账号？<a href="#">立即注册</a></p>
+  </div>
+</body>
+</html>

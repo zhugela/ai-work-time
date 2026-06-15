@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>收支录入 · 个人记账</title>
+<link rel="stylesheet" href="assets/app.css">
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand"><div class="logo">记</div><span>个人记账</span></div>
+    <nav class="nav">
+      <div class="nav-section">
+        <div class="nav-title">主导航</div>
+        <a class="nav-item" href="books.html"><span class="icon">📒</span>账本</a>
+        <a class="nav-item" href="transactions.html"><span class="icon">📋</span>收支明细</a>
+        <a class="nav-item" href="transaction-new.html"><span class="icon">✏️</span>快速录入</a>
+        <a class="nav-item" href="categories.html"><span class="icon">🏷️</span>分类管理</a>
+        <a class="nav-item" href="budgets.html"><span class="icon">🎯</span>月度预算</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-title">报表</div>
+        <a class="nav-item" href="stats-monthly.html"><span class="icon">📊</span>月度统计</a>
+        <a class="nav-item" href="stats-breakdown.html"><span class="icon">🥧</span>分类占比</a>
+        <a class="nav-item" href="stats-trend.html"><span class="icon">📈</span>收支趋势</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-title">数据</div>
+        <a class="nav-item" href="import-export.html"><span class="icon">📁</span>导入导出</a>
+      </div>
+    </nav>
+    <div class="sidebar-foot">v1.0 · 私有部署</div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="crumb">日常账本 / <b>收支录入</b></div>
+      <div class="topbar-right">
+        <div class="book-switcher"><span>🏠</span><span class="name">日常账本</span><span style="color:var(--text-tertiary)">▾</span></div>
+        <button class="icon-btn" onclick="toggleTheme()">🌓</button>
+        <a href="settings.html" style="text-decoration:none"><div class="avatar">A</div></a>
+      </div>
+    </header>
+
+    <div class="content" style="max-width:800px">
+      <div class="page-head">
+        <div>
+          <h1 class="page-title">快速录入</h1>
+          <p class="page-sub">一笔收支 3 秒完成</p>
+        </div>
+        <a href="transactions.html" class="btn btn-ghost">查看明细 →</a>
+      </div>
+
+      <div class="card">
+        <!-- 类型切换 -->
+        <div style="display:flex;justify-content:center;margin-bottom:24px">
+          <div class="type-tabs" id="typeTabs">
+            <button class="type-tab expense active" data-type="EXPENSE">支出</button>
+            <button class="type-tab income" data-type="INCOME">收入</button>
+          </div>
+        </div>
+
+        <form id="txForm" onsubmit="return false;">
+          <!-- 金额 -->
+          <div class="field" style="text-align:center">
+            <label style="text-align:center;color:var(--text-tertiary)">金额</label>
+            <div style="display:flex;align-items:baseline;justify-content:center;gap:8px">
+              <span style="font-size:24px;color:var(--text-tertiary)">¥</span>
+              <input id="amountInput" class="input" type="text" inputmode="decimal"
+                     style="font-size:36px;font-weight:600;text-align:center;height:64px;width:280px;border:none;background:transparent;font-family:'JetBrains Mono',monospace"
+                     placeholder="0.00" value="38.00">
+            </div>
+            <span class="err-msg" data-for="amount" style="text-align:center;display:block"></span>
+          </div>
+
+          <!-- 分类 -->
+          <div class="field">
+            <label>分类 <span class="req">*</span></label>
+            <div class="cat-grid" id="catGrid">
+              <div class="cat-chip active" data-cat="1"><div class="emoji">🍔</div><div class="name">餐饮</div></div>
+              <div class="cat-chip" data-cat="2"><div class="emoji">🚇</div><div class="name">交通</div></div>
+              <div class="cat-chip" data-cat="3"><div class="emoji">🛒</div><div class="name">购物</div></div>
+              <div class="cat-chip" data-cat="4"><div class="emoji">🏠</div><div class="name">居家</div></div>
+              <div class="cat-chip" data-cat="5"><div class="emoji">🎮</div><div class="name">娱乐</div></div>
+              <div class="cat-chip" data-cat="6"><div class="emoji">💊</div><div class="name">医疗</div></div>
+              <div class="cat-chip" data-cat="7"><div class="emoji">📚</div><div class="name">学习</div></div>
+              <div class="cat-chip" data-cat="8"><div class="emoji">🎁</div><div class="name">礼物</div></div>
+              <div class="cat-chip" data-cat="9"><div class="emoji">✈️</div><div class="name">旅行</div></div>
+              <div class="cat-chip" data-cat="10"><div class="emoji">📦</div><div class="name">其他</div></div>
+            </div>
+          </div>
+
+          <!-- 日期 / 支付方式 -->
+          <div class="card-row c-2">
+            <div class="field">
+              <label>日期 <span class="req">*</span></label>
+              <input class="input" type="date" name="date" value="2026-06-15">
+            </div>
+            <div class="field">
+              <label>支付方式</label>
+              <select class="select" name="pay">
+                <option value="CASH">现金</option>
+                <option value="ALIPAY" selected>支付宝</option>
+                <option value="WECHAT">微信</option>
+                <option value="BANK_CARD">银行卡</option>
+                <option value="CREDIT_CARD">信用卡</option>
+                <option value="OTHER">其他</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- 备注 -->
+          <div class="field">
+            <label>备注</label>
+            <input class="input" name="remark" placeholder="选填，最多 200 字">
+          </div>
+
+          <!-- 预算预警 -->
+          <div class="alert warn" id="budgetAlert" style="display:none">
+            ⚠️ 本月「餐饮」分类已支出 ¥820，超过月度预算 ¥800（102%）
+          </div>
+
+          <div style="display:flex;gap:12px;margin-top:24px">
+            <button class="btn btn-ghost" style="flex:1" onclick="resetForm()">重置</button>
+            <button class="btn btn-primary" style="flex:2" onclick="submitTx()">保存</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+</div>
+<script src="assets/app.js"></script>
+<script>
+  // 类型切换
+  document.querySelectorAll('#typeTabs .type-tab').forEach(t => {
+    t.addEventListener('click', () => {
+      document.querySelectorAll('#typeTabs .type-tab').forEach(x => x.classList.remove('active'));
+      t.classList.add('active');
+    });
+  });
+  // 分类选中
+  document.querySelectorAll('.cat-chip').forEach(c => {
+    c.addEventListener('click', () => {
+      document.querySelectorAll('.cat-chip').forEach(x => x.classList.remove('active'));
+      c.classList.add('active');
+    });
+  });
+  function submitTx() {
+    const amt = document.getElementById('amountInput').value;
+    if (!amt || parseFloat(amt) <= 0) {
+      document.querySelector('.err-msg[data-for="amount"]').textContent = '请输入有效金额';
+      return;
+    }
+    document.querySelector('.err-msg[data-for="amount"]').textContent = '';
+    toast('已保存：支出 ¥' + amt, 'success');
+    setTimeout(() => location.href = 'transactions.html', 600);
+  }
+  function resetForm() {
+    document.getElementById('amountInput').value = '';
+    document.querySelectorAll('.cat-chip').forEach(x => x.classList.remove('active'));
+    document.querySelector('.cat-chip').classList.add('active');
+  }
+</script>
+</body>
+</html>

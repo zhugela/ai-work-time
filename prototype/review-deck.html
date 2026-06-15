@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>个人记账后端管理系统 · 原型评审</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  /* ============== Theme ============== */
+  :root {
+    --bg-primary:#0d0d1a; --bg-alt:#11122a; --bg-cover:#07071a;
+    --text-primary:#f5f5f7; --text-secondary:rgba(245,245,247,0.72);
+    --text-tertiary:rgba(245,245,247,0.48);
+    --accent:#c9a84c; --accent-soft:rgba(201,168,76,0.16);
+    --divider:rgba(245,245,247,0.10);
+    --brand:#3B6EE8; --income:#1FB85B; --expense:#E5484D; --warn:#F5A524;
+    --font-display:"PingFang SC","Microsoft YaHei",Inter,system-ui,sans-serif;
+    --font-body:"PingFang SC","Microsoft YaHei",Inter,system-ui,sans-serif;
+  }
+  *,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+  html,body { height:100%; overflow:hidden; background:var(--bg-primary); color:var(--text-primary);
+              font-family:var(--font-body); -webkit-font-smoothing:antialiased; line-height:1.6; }
+  a { color:var(--accent); text-decoration:none; }
+  /* ============== Slides ============== */
+  .deck { height:100vh; overflow-y:scroll; scroll-snap-type:y mandatory; scroll-behavior:smooth; }
+  .slide { min-height:100vh; scroll-snap-align:start; padding:80px 96px;
+           display:flex; flex-direction:column; justify-content:center; position:relative; overflow:hidden; }
+  .slide.cover { background:radial-gradient(ellipse at top right,#1a1a3a 0%,var(--bg-cover) 60%); }
+  .slide.bg-alt { background:var(--bg-alt); }
+  .slide.accent-stripe::before { content:""; position:absolute; top:80px; left:96px; width:80px; height:3px; background:var(--accent); }
+  .eyebrow { font-size:13px; letter-spacing:3px; text-transform:uppercase; color:var(--accent); font-weight:500; margin-bottom:24px; }
+  .slide h1 { font-size:clamp(2.4rem,4.8vw,4.2rem); font-weight:700; letter-spacing:-0.02em; line-height:1.15; }
+  .slide h2 { font-size:clamp(1.8rem,3.2vw,2.6rem); font-weight:600; letter-spacing:-0.01em; margin-bottom:24px; }
+  .slide h3 { font-size:1.1rem; font-weight:600; color:var(--accent); margin-bottom:8px; }
+  .slide p, .slide li { font-size:clamp(0.95rem,1.3vw,1.05rem); color:var(--text-secondary); }
+  .slide .lead { font-size:clamp(1.05rem,1.5vw,1.3rem); color:var(--text-secondary); margin-top:16px; max-width:780px; }
+  .page-num { position:absolute; bottom:32px; right:96px; color:var(--text-tertiary); font-size:13px; font-family:"JetBrains Mono",monospace; }
+  .badge { display:inline-block; padding:4px 10px; border:1px solid var(--accent); color:var(--accent);
+           border-radius:999px; font-size:12px; font-weight:500; margin-right:8px; }
+  /* ============== Grid ============== */
+  .grid-2 { display:grid; grid-template-columns:repeat(2,1fr); gap:32px; margin-top:24px; }
+  .grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:24px; margin-top:24px; }
+  .grid-4 { display:grid; grid-template-columns:repeat(4,1fr); gap:20px; margin-top:24px; }
+  .card { padding:24px; background:rgba(255,255,255,0.03); border:1px solid var(--divider);
+          border-radius:12px; transition:all .3s; }
+  .card:hover { border-color:rgba(201,168,76,0.3); background:rgba(201,168,76,0.04); }
+  .card .num { font-size:2.4rem; font-weight:700; color:var(--accent); font-family:"JetBrains Mono",monospace; line-height:1; }
+  .card .label { font-size:13px; color:var(--text-tertiary); margin-top:8px; text-transform:uppercase; letter-spacing:1px; }
+  /* ============== Lists ============== */
+  ul.clean { list-style:none; }
+  ul.clean li { padding:10px 0 10px 28px; position:relative; border-bottom:1px solid var(--divider); }
+  ul.clean li::before { content:""; position:absolute; left:0; top:18px; width:8px; height:8px; background:var(--accent); border-radius:50%; }
+  ul.clean li b { color:var(--text-primary); font-weight:600; }
+  /* ============== Table ============== */
+  table { width:100%; border-collapse:collapse; margin-top:24px; font-size:14px; }
+  th { text-align:left; padding:14px 16px; background:rgba(255,255,255,0.04); color:var(--text-tertiary); font-weight:500; text-transform:uppercase; letter-spacing:1px; font-size:11px; }
+  td { padding:16px; border-top:1px solid var(--divider); }
+  td:first-child { color:var(--text-primary); font-weight:500; }
+  .pill { display:inline-block; padding:2px 10px; border-radius:999px; font-size:11px; font-weight:500; }
+  .pill.must { background:rgba(229,72,77,0.15); color:var(--expense); }
+  .pill.should { background:rgba(245,165,36,0.15); color:var(--warn); }
+  .pill.could { background:rgba(14,165,233,0.15); color:var(--info-500,#0EA5E9); }
+  .pill.wont { background:rgba(245,245,247,0.06); color:var(--text-tertiary); }
+  /* ============== Mock screen ============== */
+  .mock { background:#fff; border-radius:12px; padding:0; overflow:hidden; box-shadow:0 24px 48px rgba(0,0,0,0.5); margin-top:16px; }
+  .mock-head { background:#F5F7FA; padding:8px 12px; display:flex; align-items:center; gap:6px; border-bottom:1px solid #E1E6EF; }
+  .mock-head .dot { width:10px; height:10px; border-radius:50%; }
+  .mock-body { padding:20px; color:#111827; min-height:200px; }
+  .mock-title { font-size:14px; font-weight:600; margin-bottom:12px; color:#111827; }
+  /* ============== Footer ============== */
+  .footer { position:absolute; bottom:32px; left:96px; color:var(--text-tertiary); font-size:12px; letter-spacing:2px; }
+  /* ============== Animations ============== */
+  [data-animate] { opacity:0; transform:translateY(20px); transition:opacity .6s ease, transform .6s ease; }
+  [data-animate].visible { opacity:1; transform:translateY(0); }
+  [data-animate="scale"] { transform:scale(0.95); }
+  [data-animate="scale"].visible { transform:scale(1); }
+  [data-animate="left"] { transform:translateX(-30px); }
+  [data-animate="left"].visible { transform:translateX(0); }
+  /* ============== Navigation ============== */
+  .nav { position:fixed; right:24px; top:50%; transform:translateY(-50%); z-index:100;
+         display:flex; flex-direction:column; gap:8px; }
+  .nav button { width:8px; height:24px; border-radius:4px; background:rgba(255,255,255,0.2); border:none; cursor:pointer; transition:all .2s; padding:0; }
+  .nav button.active { background:var(--accent); height:36px; }
+  .progress { position:fixed; top:0; left:0; height:3px; background:var(--accent); z-index:101; transition:width .3s; }
+  /* ============== Quote ============== */
+  blockquote { padding:24px 32px; background:rgba(201,168,76,0.06); border-left:3px solid var(--accent);
+               margin:24px 0; font-style:normal; color:var(--text-primary); font-size:1.1rem; }
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) { [data-animate] { transition:none; opacity:1; transform:none; } }
+</style>
+</head>
+<body>
+<div class="progress" id="progress" style="width:0%"></div>
+<nav class="nav" id="nav"></nav>
+
+<main class="deck" id="deck">
+
+  <!-- 1. Cover -->
+  <section class="slide cover">
+    <div data-animate>
+      <div class="badge">原型评审会 · v1.0</div>
+      <h1 style="margin-top:24px">个人记账后端<br/>管理系统</h1>
+      <p class="lead">面向独立开发者的私有化部署记账底座<br/>28 条用户故事 · 8 张数据表 · 12 个核心页面</p>
+      <p style="margin-top:48px;color:var(--text-tertiary);font-size:14px">编制日期 · 2026-06-15</p>
+    </div>
+    <div class="page-num">01 / 24</div>
+  </section>
+
+  <!-- 2. 议程 -->
+  <section class="slide bg-alt accent-stripe">
+    <div class="eyebrow">Agenda</div>
+    <h2 data-animate>评审议程</h2>
+    <div class="grid-3" style="margin-top:48px">
+      <div class="card" data-animate><div class="num">01</div><div class="label">项目概述</div></div>
+      <div class="card" data-animate><div class="num">02</div><div class="label">需求要点</div></div>
+      <div class="card" data-animate><div class="num">03</div><div class="label">设计规范</div></div>
+      <div class="card" data-animate><div class="num">04</div><div class="label">逐页原型</div></div>
+      <div class="card" data-animate><div class="num">05</div><div class="label">交互逻辑</div></div>
+      <div class="card" data-animate><div class="num">06</div><div class="label">待确认问题</div></div>
+    </div>
+    <div class="page-num">02 / 24</div>
+  </section>
+
+  <!-- 3. 项目概述 -->
+  <section class="slide">
+    <div class="eyebrow">Overview</div>
+    <h2 data-animate>项目概述</h2>
+    <p class="lead" data-animate>当前 C 端记账 APP 普遍存在四大痛点：<b style="color:var(--expense)">隐私收费</b>、<b style="color:var(--expense)">数据只入不出</b>、<b style="color:var(--expense)">广告侵扰</b>、<b style="color:var(--expense)">订阅涨价</b>。</p>
+    <div class="grid-3" style="margin-top:48px">
+      <div class="card" data-animate>
+        <h3>对甲方</h3>
+        <p>节省 2-3 个月自研成本，可直接商业化封装</p>
+      </div>
+      <div class="card" data-animate>
+        <h3>对终端记账人</h3>
+        <p>数据 100% 自主；按需部署；规避第三方隐私泄露</p>
+      </div>
+      <div class="card" data-animate>
+        <h3>对生态</h3>
+        <p>提供稳定 API 契约，便于 Web/iOS/Android/小程序多端扩展</p>
+      </div>
+    </div>
+    <blockquote data-animate>愿为定制后端付费的人，永远不是「想记账」的人，而是「想做一个记账产品给别人用」的人。</blockquote>
+    <div class="page-num">03 / 24</div>
+  </section>
+
+  <!-- 4. 范围 -->
+  <section class="slide bg-alt">
+    <div class="eyebrow">Scope</div>
+    <h2 data-animate>本期范围</h2>
+    <div class="grid-2" style="margin-top:40px">
+      <div data-animate>
+        <h3 style="color:var(--income)">✅ In-Scope（本期必做）</h3>
+        <ul class="clean" style="margin-top:16px">
+          <li>账号体系 · <b>6 项</b>（注册/登录/Token/改密/退出）</li>
+          <li>账本管理 · <b>5 项</b>（CRUD + 切换 + 归档）</li>
+          <li>分类管理 · <b>4 项</b>（系统预置 + 自定义）</li>
+          <li>收支录入 · <b>5 项</b>（录入 / 列表 / 改删）</li>
+          <li>预算管控 · <b>2 项</b>（设置 / 进度）</li>
+          <li>统计报表 · <b>3 项</b>（月度 / 占比 / 趋势）</li>
+          <li>导入导出 · <b>4 项</b>（模板 / 导入 / 双导出）</li>
+        </ul>
+      </div>
+      <div data-animate>
+        <h3 style="color:var(--expense)">❌ Out-of-Scope（本期不做）</h3>
+        <ul class="clean" style="margin-top:16px">
+          <li>多用户共享账本 / 家庭协作</li>
+          <li>复式记账 / 多币种汇率换算</li>
+          <li>票据 OCR / 微信账单自动同步</li>
+          <li>AI 自动分类 / 财务建议</li>
+          <li>微信 / 邮件提醒 / App Push</li>
+          <li>第三方登录（微信/支付宝/Google）</li>
+          <li>原生 APP / 小程序 / Web 前端</li>
+        </ul>
+      </div>
+    </div>
+    <div class="page-num">04 / 24</div>
+  </section>
+
+  <!-- 5. 需求要点 -->
+  <section class="slide">
+    <div class="eyebrow">Requirements</div>
+    <h2 data-animate>需求要点</h2>
+    <div class="grid-4" style="margin-top:40px">
+      <div class="card" data-animate><div class="num">28</div><div class="label">用户故事</div></div>
+      <div class="card" data-animate><div class="num">8</div><div class="label">数据表</div></div>
+      <div class="card" data-animate"><div class="num">33</div><div class="label">REST 接口</div></div>
+      <div class="card" data-animate><div class="num">12</div><div class="label">核心页面</div></div>
+    </div>
+    <h3 style="margin-top:48px" data-animate>业务规则精选</h3>
+    <ul class="clean" style="margin-top:16px">
+      <li data-animate><b>密码强度</b> · 8-32 位含字母+数字 · 连续失败 5 次锁定 30 分钟</li>
+      <li data-animate><b>账本隔离</b> · 单用户最多 50 个 · 至少保留 1 个活跃账本</li>
+      <li data-animate><b>分类类型一致</b> · 收入分类不能录支出，反之亦然</li>
+      <li data-animate><b>预算粒度</b> · 账本-分类-月唯一预算 · 阈值 0~200%</li>
+      <li data-animate><b>导入拦截</b> · 公式注入（=开头）直接拒绝 · 单文件 ≤ 5MB / 5000 行</li>
+    </ul>
+    <div class="page-num">05 / 24</div>
+  </section>
+
+  <!-- 6. 数据表 -->
+  <section class="slide bg-alt">
+    <div class="eyebrow">Data Model</div>
+    <h2 data-animate>核心数据表</h2>
+    <table data-animate>
+      <thead><tr><th>表名</th><th>主键</th><th>关键外键</th><th>级联</th></tr></thead>
+      <tbody>
+        <tr><td>sys_user</td><td>id</td><td>—</td><td>—</td></tr>
+        <tr><td>book</td><td>id</td><td>user_id</td><td>CASCADE</td></tr>
+        <tr><td>category</td><td>id</td><td>user_id / book_id</td><td>CASCADE</td></tr>
+        <tr><td>tx_record</td><td>id</td><td>book_id / user_id / category_id</td><td>CASCADE / RESTRICT</td></tr>
+        <tr><td>budget</td><td>id</td><td>book_id / category_id</td><td>CASCADE</td></tr>
+        <tr><td>auth_token</td><td>id</td><td>user_id</td><td>CASCADE</td></tr>
+        <tr><td>audit_log</td><td>id</td><td>user_id</td><td>SET NULL（保留审计）</td></tr>
+      </tbody>
+    </table>
+    <p class="lead" style="margin-top:24px" data-animate>已通过 sqlite-mcp 落地验证：用户级联删除账本/记录/预算；分类删除受 RESTRICT 保护；自洽性 ✓</p>
+    <div class="page-num">06 / 24</div>
+  </section>
+
+  <!-- 7. 设计规范 - 颜色 -->
+  <section class="slide">
+    <div class="eyebrow">Design System</div>
+    <h2 data-animate>设计规范 · 颜色</h2>
+    <div class="grid-4" style="margin-top:40px">
+      <div class="card" data-animate>
+        <div style="width:100%;height:60px;background:#3B6EE8;border-radius:8px"></div>
+        <div class="label" style="color:var(--text-primary);margin-top:12px">Brand · 品牌主色</div>
+        <div style="font-family:'JetBrains Mono',monospace;color:var(--text-tertiary);font-size:12px">#3B6EE8</div>
+      </div>
+      <div class="card" data-animate>
+        <div style="width:100%;height:60px;background:#1FB85B;border-radius:8px"></div>
+        <div class="label" style="color:var(--text-primary);margin-top:12px">Income · 收入</div>
+        <div style="font-family:'JetBrains Mono',monospace;color:var(--text-tertiary);font-size:12px">#1FB85B</div>
+      </div>
+      <div class="card" data-animate>
+        <div style="width:100%;height:60px;background:#E5484D;border-radius:8px"></div>
+        <div class="label" style="color:var(--text-primary);margin-top:12px">Expense · 支出</div>
+        <div style="font-family:'JetBrains Mono',monospace;color:var(--text-tertiary);font-size:12px">#E5484D</div>
+      </div>
+      <div class="card" data-animate>
+        <div style="width:100%;height:60px;background:#F5A524;border-radius:8px"></div>
+        <div class="label" style="color:var(--text-primary);margin-top:12px">Warn · 预警</div>
+        <div style="font-family:'JetBrains Mono',monospace;color:var(--text-tertiary);font-size:12px">#F5A524</div>
+      </div>
+    </div>
+    <p class="lead" style="margin-top:32px" data-animate>中性色阶 12 阶 · 字号 9 级 · 间距 10 阶（4 倍数）· 圆角 6 阶 · 阴影 5 阶</p>
+    <div class="page-num">07 / 24</div>
+  </section>
+
+  <!-- 8. 设计规范 - 组件 -->
+  <section class="slide bg-alt">
+    <div class="eyebrow">Components</div>
+    <h2 data-animate>通用组件约束</h2>
+    <div class="grid-2" style="margin-top:40px">
+      <div data-animate>
+        <h3>Button</h3>
+        <p>变体 5 种（Primary/Secondary/Ghost/Danger/Text）· 尺寸 3 档（32/40/48）· 圆角 8 · 焦点环 2px</p>
+      </div>
+      <div data-animate>
+        <h3>Input</h3>
+        <p>高度 40/48 · 错误态红边 + 下方红字 · 必填字段标签后红 <code>*</code> · 焦点环 4px brand-100</p>
+      </div>
+      <div data-animate>
+        <h3>Card</h3>
+        <p>圆角 12 · 阴影 sm · 标题区底部 1px 分割 · 悬浮变 md 阴影</p>
+      </div>
+      <div data-animate>
+        <h3>Table</h3>
+        <p>行高 56 · 表头 n-50 底 · 行间 1px 分割（不画全边框）· 金额列等宽数字右对齐</p>
+      </div>
+      <div data-animate>
+        <h3>Modal</h3>
+        <p>居中定位 · 圆角 12 · 阴影 lg · 560/800/960 三档宽度 · 头部 64 + 1px 分割</p>
+      </div>
+      <div data-animate>
+        <h3>Toast</h3>
+        <p>顶部居中 · 3s 自动消失 · success=绿 / error=红 / warn=橙</p>
+      </div>
+    </div>
+    <div class="page-num">08 / 24</div>
+  </section>
+
+  <!-- 9. 优先级 -->
+  <section class="slide">
+    <div class="eyebrow">MoSCoW</div>
+    <h2 data-animate>优先级划分</h2>
+    <table data-animate>
+      <thead><tr><th>优先级</th><th>数量</th><th>代表性功能</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td><span class="pill must">Must</span></td><td>8 项</td><td>账号/账本/录入/分类/预算/统计/导出</td><td>MVP 阻塞项，缺一不可用</td></tr>
+        <tr><td><span class="pill should">Should</span></td><td>8 项</td><td>改密/归档/预警/趋势/导入/统计导出</td><td>本期做，价值高</td></tr>
+        <tr><td><span class="pill could">Could</span></td><td>4 项</td><td>管理员域全部</td><td>时间允许就做</td></tr>
+        <tr><td><span class="pill wont">Won't</span></td><td>11 类</td><td>共享/复式/OCR/AI/客户端等</td><td>本期明确不做</td></tr>
+      </tbody>
+    </table>
+    <div class="page-num">09 / 24</div>
+  </section>
+
+  <!-- 10. 原型总览 -->
+  <section class="slide bg-alt">
+    <div class="eyebrow">Prototypes</div>
+    <h2 data-animate>12 个核心页面 · 全景</h2>
+    <div class="grid-4" style="margin-top:40px">
+      <div class="card" data-animate><h3>01 登录</h3><p>账号密码 + 记住我 + 忘记密码</p></div>
+      <div class="card" data-animate><h3>02 注册</h3><p>用户名/邮箱/密码实时校验</p></div>
+      <div class="card" data-animate><h3>03 个人设置</h3><p>资料 / 改密 / 偏好 / 危险区</p></div>
+      <div class="card" data-animate><h3>04 账本列表</h3><p>活跃 + 归档分区，新建弹窗</p></div>
+      <div class="card" data-animate><h3>05 收支录入</h3><p>类型切换 + 分类网格 + 大金额</p></div>
+      <div class="card" data-animate><h3>06 分类管理</h3><p>系统预置 / 自定义 tab 切换</p></div>
+      <div class="card" data-animate><h3>07 月度预算</h3><p>总览卡片 + 分类进度条</p></div>
+      <div class="card" data-animate><h3>08 收支明细</h3><p>多维筛选 + 分页 + 软删除</p></div>
+      <div class="card" data-animate><h3>09 月度统计</h3><p>3 大数字 + 收入/支出结构</p></div>
+      <div class="card" data-animate><h3>10 分类占比</h3><p>纯 SVG 环形 + 横向条形</p></div>
+      <div class="card" data-animate><h3>11 收支趋势</h3><p>纯 SVG 三折线 + 月度表</p></div>
+      <div class="card" data-animate><h3>12 导入导出</h3><p>拖拽上传 + 错误行预览</p></div>
+    </div>
+    <div class="page-num">10 / 24</div>
+  </section>
+
+  <!-- 11. 原型 - 登录 -->
+  <section class="slide">
+    <div class="eyebrow">Page 01 / 12</div>
+    <h2 data-animate>登录页</h2>
+    <div class="grid-2" style="margin-top:40px">
+      <div data-animate>
+        <h3>核心交互</h3>
+        <ul class="clean" style="margin-top:16px">
+          <li>账号必填 + 密码 ≥ 8 位校验</li>
+          <li>失败 5 次锁定 30 分钟</li>
+          <li>登录成功 toast + 跳转账本列表</li>
+          <li>「记住我」本地存储偏好</li>
+          <li>「忘记密码」待二轮迭代</li>
+        </ul>
+      </div>
+      <div class="mock" data-animate>
+        <div class="mock-head"><div class="dot" style="background:#FF5F57"></div><div class="dot" style="background:#FEBC2E"></div><div class="dot" style="background:#28C840"></div><div style="margin-left:8px;font-size:11px;color:#6B7585">login.html</div></div>
+        <div class="mock-body" style="text-align:center;padding:32px 20px">
+          <div style="display:inline-block;padding:8px 14px;background:#3B6EE8;color:#fff;border-radius:8px;font-weight:700">记</div>
+          <div class="mock-title" style="margin-top:12px">登录 · 个人记账</div>
+          <input style="width:100%;height:36px;margin-top:8px;padding:0 10px;border:1px solid #E1E6EF;border-radius:6px" value="alice" readonly>
+          <input style="width:100%;height:36px;margin-top:8px;padding:0 10px;border:1px solid #E1E6EF;border-radius:6px" value="********" readonly>
+          <button style="width:100%;height:40px;margin-top:12px;background:#3B6EE8;color:#fff;border:none;border-radius:8px;font-weight:500">登 录</button>
+        </div>
+      </div>
+    </div>
+    <div class="page-num">11 / 24</div>
+  </section>
+
+  <!-- 12. 原型 - 录入页 -->
+  <section class="slide bg-alt">
+    <div class="eyebrow">Page 05 / 12</div>
+    <h2 data-animate>收支录入</h2>
+    <div class="grid-2" style="margin-top:40px">
+      <div data-animate>
+        <h3>设计要点</h3>
+        <ul class="clean" style="margin-top:16px">
+          <li>类型 tab：支出/收入一键切换</li>
+          <li>大金额输入 · 36px 等宽字体</li>
+          <li>10 个分类 emoji 网格 · 点击选中态</li>
+          <li>录入后实时触发预算检查</li>
+          <li>超预算响应字段携带 warn 标志</li>
+        </ul>
+      </div>
+      <div class="mock" data-animate>
+        <div class="mock-head"><div class="dot" style="background:#FF5F57"></div><div class="dot" style="background:#FEBC2E"></div><div class="dot" style="background:#28C840"></div><div style="margin-left:8px;font-size:11px;color:#6B7585">transaction-new.html</div></div>
+        <div class="mock-body" style="padding:16px">
+          <div style="display:inline-flex;background:#EEF1F6;border-radius:6px;padding:3px">
+            <span style="background:#fff;color:#E5484D;padding:4px 12px;border-radius:4px;font-size:12px">支出</span>
+            <span style="padding:4px 12px;color:#6B7585;font-size:12px">收入</span>
+          </div>
+          <div style="text-align:center;margin-top:16px">
+            <span style="color:#6B7585">¥</span>
+            <span style="font-size:32px;font-weight:600;font-family:'JetBrains Mono',monospace">38.00</span>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:12px">
+            <div style="padding:8px;border:2px solid #3B6EE8;border-radius:6px;background:#EEF4FF;text-align:center"><div style="font-size:18px">🍔</div><div style="font-size:10px">餐饮</div></div>
+            <div style="padding:8px;border:1px solid #E1E6EF;border-radius:6px;text-align:center"><div style="font-size:18px">🚇</div><div style="font-size:10px">交通</div></div>
+            <div style="padding:8px;border:1px solid #E1E6EF;border-radius:6px;text-align:center"><div style="font-size:18px">🛒</div><div style="font-size:10px">购物</div></div>
+            <div style="padding:8px;border:1px solid #E1E6EF;border-radius:6px;text-align:center"><div style="font-size:18px">🏠</div><div style="font-size:10px">居家</div></div>
+            <div style="padding:8px;border:1px solid #E1E6EF;border-radius:6px;text-align:center"><div style="font-size:18px">🎮</div><div style="font-size:10px">娱乐</div></div>
+          </div>
+          <div style="margin-top:12px;padding:8px 12px;background:#FEF6E6;color:#F5A524;border-radius:6px;font-size:11px">⚠️ 本月「餐饮」已支出 ¥820，超预算 ¥800（102%）</div>
+        </div>
+      </div>
+    </div>
+    <div class="page-num">12 / 24</div>
+  </section>
+
+  <!-- 13. 原型 - 预算 -->
+  <section class="slide">
+    <div class="eyebrow">Page 07 / 12</div>
+    <h2 data-animate>月度预算</h2>
+    <div class="grid-2" style="margin-top:40px">
+      <div data-animate>
+        <h3>核心规则</h3>
+        <ul class="clean" style="margin-top:16px">
+          <li>3 张概览卡：总预算 / 已支出 / 剩余</li>
+          <li>分类进度条三色：brand（&lt;80%）/ warn（80~100%）/ expense（&gt;100%）</li>
+          <li>预警阈值可配置 0~200%</li>
+          <li>预算仅对 EXPENSE 分类生效</li>
+          <li>同账本-分类-月唯一（覆盖语义）</li>
+        </ul>
+      </div>
+      <div class="mock" data-animate>
+        <div class="mock-head"><div class="dot" style="background:#FF5F57"></div><div class="dot" style="background:#FEBC2E"></div><div class="dot" style="background:#28C840"></div><div style="margin-left:8px;font-size:11px;color:#6B7585">budgets.html</div></div>
+        <div class="mock-body" style="padding:16px">
+          <div style="display:flex;gap:8px">
+            <div style="flex:1;padding:8px;background:#FAFBFC;border-radius:6px"><div style="font-size:11px;color:#6B7585">总预算</div><div style="font-size:18px;font-weight:600;font-family:'JetBrains Mono',monospace">¥3,500</div></div>
+            <div style="flex:1;padding:8px;background:#FAFBFC;border-radius:6px"><div style="font-size:11px;color:#6B7585">已支出</div><div style="font-size:18px;font-weight:600;color:#E5484D;font-family:'JetBrains Mono',monospace">¥2,180</div></div>
+            <div style="flex:1;padding:8px;background:#FAFBFC;border-radius:6px"><div style="font-size:11px;color:#6B7585">剩余</div><div style="font-size:18px;font-weight:600;color:#1FB85B;font-family:'JetBrains Mono',monospace">¥1,320</div></div>
+          </div>
+          <div style="margin-top:14px">
+            <div style="display:flex;justify-content:space-between;font-size:12px"><span>🍔 餐饮</span><span style="color:#E5484D">¥820 / ¥800</span></div>
+            <div style="height:8px;background:#EEF1F6;border-radius:4px;margin-top:4px"><div style="width:102%;height:100%;background:#E5484D;border-radius:4px"></div></div>
+          </div>
+          <div style="margin-top:12px">
+            <div style="display:flex;justify-content:space-between;font-size:12px"><span>🛒 购物</span><span style="color:#6B7585">¥720 / ¥1,000</span></div>
+            <div style="height:8px;background:#EEF1F6;border-radius:4px;margin-top:4px"><div style="width:72%;height:100%;background:#F5A524;border-radius:4px"></div></div>
+          </div>
+          <div style="margin-top:12px">
+            <div style="display:flex;justify-content:space-between;font-size:12px"><span>🚇 交通</span><span style="color:#6B7585">¥320 / ¥600</span></div>
+            <div style="height:8px;background:#EEF1F6;border-radius:4px;margin-top:4px"><div style="width:53%;height:100%;background:#3B6EE8;border-radius:4px"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="page-num">13 / 24</div>
+  </section>
+
+  <!-- 14. 原型 - 占比 -->
+  <section class="slide bg-alt">
+    <div class="eyebrow">Page 10 / 12</div>
+    <h2 data-animate>分类占比</h2>
+    <div class="grid-2" style="margin-top:40px">
+      <div data-animate>
+        <h3>设计取舍</h3>
+        <ul class="clean" style="margin-top:16px">
+          <li>纯 SVG 环形图（无三方依赖）</li>
+          <li>横向条形图作为明细（更易读）</li>
+          <li>top10 + 其他合并</li>
+          <li>占比合计 = 100%（保留 2 位）</li>
+          <li>空月份友好处理</li>
+        </ul>
+      </div>
+      <div class="mock" data-animate>
+        <div class="mock-head"><div class="dot" style="background:#FF5F57"></div><div class="dot" style="background:#FEBC2E"></div><div class="dot" style="background:#28C840"></div><div style="margin-left:8px;font-size:11px;color:#6B7585">stats-breakdown.html</div></div>
+        <div class="mock-body" style="padding:16px">
+          <svg viewBox="0 0 200 200" style="width:140px;height:140px;margin:0 auto;display:block">
+            <circle cx="100" cy="100" r="60" fill="none" stroke="#EEF1F6" stroke-width="28"/>
+            <circle cx="100" cy="100" r="60" fill="none" stroke="#3B6EE8" stroke-width="28" stroke-dasharray="94 377" transform="rotate(-90 100 100)"/>
+            <circle cx="100" cy="100" r="60" fill="none" stroke="#0EA5E9" stroke-width="28" stroke-dasharray="83 377" stroke-dashoffset="-94" transform="rotate(-90 100 100)"/>
+            <circle cx="100" cy="100" r="60" fill="none" stroke="#1FB85B" stroke-width="28" stroke-dasharray="37 377" stroke-dashoffset="-177" transform="rotate(-90 100 100)"/>
+            <circle cx="100" cy="100" r="60" fill="none" stroke="#F5A524" stroke-width="28" stroke-dasharray="30 377" stroke-dashoffset="-214" transform="rotate(-90 100 100)"/>
+            <text x="100" y="98" text-anchor="middle" font-size="11" fill="#6B7585">总支出</text>
+            <text x="100" y="115" text-anchor="middle" font-size="15" font-weight="700" fill="#111827" font-family="'JetBrains Mono',monospace">¥3,256</text>
+          </svg>
+          <div style="margin-top:8px">
+            <div style="display:flex;align-items:center;gap:6px;font-size:11px"><span style="width:8px;height:8px;background:#3B6EE8;border-radius:2px"></span>🍔 餐饮 25%</div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:11px;margin-top:4px"><span style="width:8px;height:8px;background:#0EA5E9;border-radius:2px"></span>🛒 购物 22%</div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:11px;margin-top:4px"><span style="width:8px;height:8px;background:#1FB85B;border-radius:2px"></span>🚇 交通 10%</div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:11px;margin-top:4px"><span style="width:8px;height:8px;background:#F5A524;border-radius:2px"></span>🏠 居家 8%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="page-num">14 / 24</div>
+  </section>
+
+  <!-- 15. 原型 - 趋势 -->
+  <section class="slide">
+    <div class="eyebrow">Page 11 / 12</div>
+    <h2 data-animate>收支趋势</h2>
+    <div class="grid-2" style="margin-top:40px">
+      <div data-animate>
+        <h3>设计要点</h3>
+        <ul class="clean" style="margin-top:16px">
+          <li>三折线：收入（实线绿）/ 支出（实线红）/ 结余（虚线蓝）</li>
+          <li>纯 SVG · 数据点用白底圆圈高亮</li>
+          <li>支持 6/12 月范围切换</li>
+          <li>下方数据表提供环比箭头</li>
+          <li>空月份补 0</li>
+        </ul>
+      </div>
+      <div class="mock" data-animate>
+        <div class="mock-head"><div class="dot" style="background:#FF5F57"></div><div class="dot" style="background:#FEBC2E"></div><div class="dot" style="background:#28C840"></div><div style="margin-left:8px;font-size:11px;color:#6B7585">stats-trend.html</div></div>
+        <div class="mock-body" style="padding:12px">
+          <svg viewBox="0 0 320 140" style="width:100%;height:140px">
+            <g stroke="#EEF1F6" stroke-width="0.5">
+              <line x1="20" y1="20" x2="310" y2="20"/>
+              <line x1="20" y1="55" x2="310" y2="55"/>
+              <line x1="20" y1="90" x2="310" y2="90"/>
+              <line x1="20" y1="125" x2="310" y2="125"/>
+            </g>
+            <polyline points="40,40 90,40 140,40 190,40 240,40 290,38" fill="none" stroke="#1FB85B" stroke-width="2"/>
+            <polyline points="40,80 90,85 140,90 190,87 240,87 290,95" fill="none" stroke="#E5484D" stroke-width="2"/>
+            <polyline points="40,60 90,58 140,52 190,55 240,55 290,45" fill="none" stroke="#3B6EE8" stroke-width="2" stroke-dasharray="3 2"/>
+            <g font-size="8" fill="#6B7585" text-anchor="middle">
+              <text x="40" y="138">2026-01</text>
+              <text x="90" y="138">2026-02</text>
+              <text x="140" y="138">2026-03</text>
+              <text x="190" y="138">2026-04</text>
+              <text x="240" y="138">2026-05</text>
+              <text x="290" y="138">2026-06</text>
+            </g>
+          </svg>
+          <div style="display:flex;gap:12px;margin-top:6px;font-size:10px;color:#6B7585">
+            <span><i style="display:inline-block;width:6px;height:6px;background:#1FB85B;border-radius:50%;margin-right:3px"></i>收入</span>
+            <span><i style="display:inline-block;width:6px;height:6px;background:#E5484D;border-radius:50%;margin-right:3px"></i>支出</span>
+            <span><i style="display:inline-block;width:6px;height:6px;background:#3B6EE8;border-radius:50%;margin-right:3px"></i>结余</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="page-num">15 / 24</div>
+  </section>
+
+  <!-- 16. 原型 - 导入导出 -->
+  <section class="slide bg-alt">
+    <div class="eyebrow">Page 12 / 12</div>
+    <h2 data-animate>导入导出</h2>
+    <div class="grid-2" style="margin-top:40px">
+      <div data-animate>
+        <h3>三大亮点</h3>
+        <ul class="clean" style="margin-top:16px">
+          <li>拖拽上传 · 5MB / 5000 行双重限制</li>
+          <li>导入预览弹窗：3 张概览 + 错误行表</li>
+          <li>公式注入拦截（=开头直接拒）</li>
+          <li>导出支持明细 / 月报 / 分类清单</li>
+          <li>历史记录可追溯</li>
+        </ul>
+      </div>
+      <div class="mock" data-animate>
+        <div class="mock-head"><div class="dot" style="background:#FF5F57"></div><div class="dot" style="background:#FEBC2E"></div><div class="dot" style="background:#28C840"></div><div style="margin-left:8px;font-size:11px;color:#6B7585">import-export.html</div></div>
+        <div class="mock-body" style="padding:16px">
+          <div style="border:2px dashed #C9D1DE;border-radius:8px;padding:16px;text-align:center;color:#6B7585;background:#FAFBFC">
+            <div style="font-size:24px">📄</div>
+            <div style="margin-top:4px;font-size:12px">点击或拖拽 Excel 至此处</div>
+            <div style="font-size:10px;margin-top:2px">≤ 5MB · ≤ 5000 行</div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px">
+            <div style="padding:8px;background:#E6F8EE;border-radius:6px;text-align:center"><div style="font-size:10px;color:#6B7585">总行数</div><div style="font-size:18px;font-weight:600;font-family:'JetBrains Mono',monospace">420</div></div>
+            <div style="padding:8px;background:#E6F8EE;border-radius:6px;text-align:center"><div style="font-size:10px;color:#6B7585">可导入</div><div style="font-size:18px;font-weight:600;color:#1FB85B;font-family:'JetBrains Mono',monospace">412</div></div>
+            <div style="padding:8px;background:#FCEDED;border-radius:6px;text-align:center"><div style="font-size:10px;color:#6B7585">失败行</div><div style="font-size:18px;font-weight:600;color:#E5484D;font-family:'JetBrains Mono',monospace">8</div></div>
+          </div>
+          <div style="margin-top:8px;padding:6px 10px;background:#FCEDED;color:#E5484D;border-radius:4px;font-size:10px">⚠️ 8 行数据存在错误</div>
+        </div>
+      </div>
+    </div>
+    <div class="page-num">16 / 24</div>
+  </section>
+
+  <!-- 17. 交互逻辑总览 -->
+  <section class="slide">
+    <div class="eyebrow">Interactions</div>
+    <h2 data-animate>交互逻辑 · 5 大场景</h2>
+    <div class="grid-3" style="margin-top:40px">
+      <div class="card" data-animate>
+        <h3>① 表单校验</h3>
+        <p>注册/录入/预算均含字段级红字提示，提交前拦截</p>
+      </div>
+      <div class="card" data-animate>
+        <h3>② 弹窗显隐</h3>
+        <p>新建账本 / 设置预算 / 导入预览 / 分类编辑 / 确认删除</p>
+      </div>
+      <div class="card" data-animate>
+        <h3>③ 账本切换</h3>
+        <p>顶部栏快捷切换器 · 全局生效 · Toast 反馈</p>
+      </div>
+      <div class="card" data-animate>
+        <h3>④ 月份切换</h3>
+        <p>预算/统计/趋势页通过 type=month 切换，触发数据重渲染</p>
+      </div>
+      <div class="card" data-animate>
+        <h3>⑤ 主题切换</h3>
+        <p>localStorage 持久化 · 浅/暗/跟随系统三种模式</p>
+      </div>
+      <div class="card" data-animate>
+        <h3>⑥ Tab 切换</h3>
+        <p>设置页 4 tab / 分类页 2 tab / 导入页 3 tab</p>
+      </div>
+    </div>
+    <div class="page-num">17 / 24</div>
+  </section>
+
+  <!-- 18. 错误与空态 -->
+  <section class="slide bg-alt">
+    <div class="eyebrow">States</div>
+    <h2 data-animate>空 / 错 / 加载态约定</h2>
+    <div class="grid-3" style="margin-top:40px">
+      <div data-animate>
+        <h3>空态</h3>
+        <div class="card" style="text-align:center;padding:32px 16px;margin-top:12px">
+          <div style="font-size:40px;opacity:.5">📋</div>
+          <div style="font-size:13px;color:var(--text-secondary);margin-top:8px">还没有任何记录</div>
+          <div style="font-size:11px;color:var(--text-tertiary)">点击 + 快速录入开始记账</div>
+        </div>
+      </div>
+      <div data-animate>
+        <h3>加载态</h3>
+        <div class="card" style="margin-top:12px">
+          <div style="display:flex;gap:12px;align-items:center">
+            <div style="width:32px;height:32px;background:linear-gradient(90deg,#EEF1F6 0%,#E1E6EF 50%,#EEF1F6 100%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:6px"></div>
+            <div style="flex:1">
+              <div style="height:12px;background:linear-gradient(90deg,#EEF1F6 0%,#E1E6EF 50%,#EEF1F6 100%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:4px"></div>
+              <div style="height:10px;background:linear-gradient(90deg,#EEF1F6 0%,#E1E6EF 50%,#EEF1F6 100%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:4px;margin-top:6px;width:60%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-animate>
+        <h3>错误态</h3>
+        <div class="card" style="margin-top:12px">
+          <input style="width:100%;height:36px;padding:0 10px;border:1px solid #E5484D;border-radius:6px" value="123" readonly>
+          <div style="color:#E5484D;font-size:11px;margin-top:4px">密码至少 8 位，且需含字母与数字</div>
+        </div>
+        <div style="background:#E5484D;color:#fff;padding:6px 12px;border-radius:6px;margin-top:8px;font-size:12px;display:inline-block">保存失败：网络异常</div>
+      </div>
+    </div>
+    <div class="page-num">18 / 24</div>
+  </section>
+
+  <!-- 19. 验收对照 -->
+  <section class="slide">
+    <div class="eyebrow">Acceptance</div>
+    <h2 data-animate>原型与 AC 对照</h2>
+    <table data-animate>
+      <thead><tr><th>原型页面</th><th>覆盖用户故事</th><th>关键 Done Criteria</th></tr></thead>
+      <tbody>
+        <tr><td>登录/注册</td><td>US-01, US-02</td><td>必填校验 / 失败 5 次锁定 / Token 下发</td></tr>
+        <tr><td>个人设置</td><td>US-03, US-05</td><td>改密后 Token 失效 / 退出幂等</td></tr>
+        <tr><td>账本列表</td><td>US-06, US-07, US-08</td><td>50 上限 / 最后活跃不可归档 / 切换生效</td></tr>
+        <tr><td>收支录入</td><td>US-09, US-10, US-11</td><td>分类类型一致 / 金额 > 0 / 软删除</td></tr>
+        <tr><td>分类管理</td><td>US-13, US-14</td><td>系统预置只读 / 自定义 100 上限</td></tr>
+        <tr><td>月度预算</td><td>US-15, US-16, US-17</td><td>三色进度条 / 实时预警 / 阈值配置</td></tr>
+        <tr><td>收支明细</td><td>US-12</td><td>多维筛选 / 软删除过滤 / 分页 20/50/100</td></tr>
+        <tr><td>月度统计</td><td>US-18, US-19</td><td>3 大数字 / 占比合计 100%</td></tr>
+        <tr><td>分类占比</td><td>US-19</td><td>top10 + 其他 / 月份切换</td></tr>
+        <tr><td>收支趋势</td><td>US-20</td><td>三折线 / 6/12 月范围 / 空月补 0</td></tr>
+        <tr><td>导入导出</td><td>US-21~24</td><td>5MB/5000 行 / 公式拦截 / 错误行回显</td></tr>
+      </tbody>
+    </table>
+    <div class="page-num">19 / 24</div>
+  </section>
+
+  <!-- 20. 可访问性 -->
+  <section class="slide bg-alt">
+    <div class="eyebrow">A11y</div>
+    <h2 data-animate>可访问性承诺</h2>
+    <div class="grid-2" style="margin-top:40px">
+      <div data-animate>
+        <h3>键盘可达</h3>
+        <ul class="clean" style="margin-top:16px">
+          <li>Tab 顺序 = 视觉顺序</li>
+          <li>所有交互元素带焦点环</li>
+          <li>弹窗 focus trap + Esc 关闭</li>
+          <li>Skip to main content 链接</li>
+        </ul>
+      </div>
+      <div data-animate>
+        <h3>视觉对比</h3>
+        <ul class="clean" style="margin-top:16px">
+          <li>正文与背景 ≥ 4.5:1（WCAG AA）</li>
+          <li>大字体 ≥ 3:1</li>
+          <li>颜色不作为唯一信息载体</li>
+          <li>错误信息双重提示（图标+文字）</li>
+        </ul>
+      </div>
+    </div>
+    <p class="lead" style="margin-top:32px" data-animate>所有金额用等宽字体 · 数字不被压缩 · 减少动效开关（prefers-reduced-motion）</p>
+    <div class="page-num">20 / 24</div>
+  </section>
+
+  <!-- 21. 评审待确认 G-01~05 -->
+  <section class="slide">
+    <div class="eyebrow">Open Questions · G-01 ~ G-05</div>
+    <h2 data-animate>评审待确认问题（1/3）</h2>
+    <ul class="clean" style="margin-top:32px;max-width:920px">
+      <li data-animate><b>G-01 顶部账本切换器位置</b> · 建议放侧边栏顶部，需评审确认</li>
+      <li data-animate><b>G-02 录入页是 Modal 还是独立页</b> · 当前用独立页，理由：信息密度大；需确认</li>
+      <li data-animate><b>G-03 弹窗 vs 抽屉边界</b> · 建议：导入/确认/月份=Modal，分类管理=Drawer</li>
+      <li data-animate><b>G-04 收支色彩编码</b> · 收入=绿、支出=红、转账=蓝（本期不做转账）</li>
+      <li data-animate><b>G-05 分类图标选型</b> · 当前用 emoji；备选 Lucide 线性图标</li>
+    </ul>
+    <div class="page-num">21 / 24</div>
+  </section>
+
+  <!-- 22. 待确认 G-06~15 -->
+  <section class="slide bg-alt">
+    <div class="eyebrow">Open Questions · G-06 ~ G-15</div>
+    <h2 data-animate>评审待确认问题（2/3）</h2>
+    <ul class="clean" style="margin-top:32px;max-width:920px">
+      <li data-animate><b>G-06 预算进度条颜色阈值</b> · 当前 80% / 100% 两档；阈值可配置？</li>
+      <li data-animate><b>G-07 趋势图图表库</b> · 当前纯 SVG；备选 ECharts / Chart.js</li>
+      <li data-animate><b>G-08 分类占比图</b> · 当前横向条形；备选环形/饼图</li>
+      <li data-animate><b>G-09 表格分页</b> · 20/50/100 三档</li>
+      <li data-animate><b>G-10 移动端适配</b> · 本期不做，二期再议</li>
+      <li data-animate><b>G-11 主题默认</b> · 跟随系统 + 用户可覆盖</li>
+      <li data-animate><b>G-12 占位/加载</b> · 列表用骨架屏</li>
+      <li data-animate><b>G-13 错误提示</b> · 字段级 + 顶部 toast</li>
+      <li data-animate><b>G-14 图标库</b> · 内联 SVG，不依赖 CDN</li>
+      <li data-animate><b>G-15 字体加载</b> · 系统字体优先 + 英文 Inter 增强</li>
+    </ul>
+    <div class="page-num">22 / 24</div>
+  </section>
+
+  <!-- 23. 决策与下一步 -->
+  <section class="slide">
+    <div class="eyebrow">Next Steps</div>
+    <h2 data-animate>评审后决策点</h2>
+    <div class="grid-3" style="margin-top:40px">
+      <div class="card" data-animate>
+        <h3>决议项</h3>
+        <ul class="clean" style="margin-top:12px">
+          <li>G-01 账本切换器位置</li>
+          <li>G-04 收支色彩编码</li>
+          <li>G-05 分类图标选型</li>
+          <li>G-08 占比图形式</li>
+        </ul>
+      </div>
+      <div class="card" data-animate>
+        <h3>技术决议</h3>
+        <ul class="clean" style="margin-top:12px">
+          <li>图表库选型（G-07）</li>
+          <li>分页档位（G-09）</li>
+          <li>主题切换默认值（G-11）</li>
+          <li>图标库策略（G-14）</li>
+        </ul>
+      </div>
+      <div class="card" data-animate>
+        <h3>下一步</h3>
+        <ul class="clean" style="margin-top:12px">
+          <li>评审通过 → 后端编码</li>
+          <li>PRD/Scope/AC 三件套归档</li>
+          <li>设计规范进入设计系统库</li>
+          <li>二期规划立项</li>
+        </ul>
+      </div>
+    </div>
+    <div class="page-num">23 / 24</div>
+  </section>
+
+  <!-- 24. 致谢 -->
+  <section class="slide cover">
+    <div style="text-align:center" data-animate>
+      <div style="font-size:14px;letter-spacing:4px;color:var(--accent);margin-bottom:24px">END OF REVIEW</div>
+      <h1 style="font-size:clamp(2.5rem,5vw,4rem)">感谢评审</h1>
+      <p class="lead" style="margin-top:24px">请扫描二维码加入评审反馈群<br/>或邮件至 feedback@personal-jz.dev</p>
+      <div style="margin-top:48px;display:inline-block;padding:40px;background:rgba(255,255,255,0.04);border:1px solid var(--divider);border-radius:16px">
+        <div style="width:120px;height:120px;background:#fff;display:flex;align-items:center;justify-content:center;border-radius:8px;font-family:'JetBrains Mono',monospace;color:#000;font-size:10px">QR-CODE</div>
+        <div style="margin-top:12px;color:var(--text-tertiary);font-size:12px">原型 + 设计规范 + PRD</div>
+      </div>
+    </div>
+    <div class="page-num">24 / 24</div>
+  </section>
+
+</main>
+
+<style>@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}</style>
+
+<script>
+  (function () {
+    const slides = document.querySelectorAll('.slide');
+    const total = slides.length;
+    const nav = document.getElementById('nav');
+    const progress = document.getElementById('progress');
+    const deck = document.getElementById('deck');
+    let current = 0;
+
+    // Build nav dots
+    slides.forEach((_, i) => {
+      const b = document.createElement('button');
+      b.setAttribute('aria-label', 'Go to slide ' + (i + 1));
+      b.addEventListener('click', () => goTo(i));
+      nav.appendChild(b);
+    });
+    const dots = nav.querySelectorAll('button');
+
+    function updateChrome(idx) {
+      current = idx;
+      dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+      progress.style.width = (((idx + 1) / total) * 100) + '%';
+    }
+
+    function goTo(target) {
+      const idx = Math.max(0, Math.min(target, total - 1));
+      slides[idx].scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Animate on enter
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.querySelectorAll('[data-animate]').forEach((el, i) => {
+            setTimeout(() => el.classList.add('visible'), i * 100);
+          });
+        }
+      });
+    }, { threshold: 0.4 });
+    slides.forEach(s => observer.observe(s));
+
+    // Track current slide
+    const scrollObs = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          const idx = Array.from(slides).indexOf(e.target);
+          updateChrome(idx);
+        }
+      });
+    }, { threshold: 0.5 });
+    slides.forEach(s => scrollObs.observe(s));
+
+    // Keyboard
+    document.addEventListener('keydown', (e) => {
+      if (['ArrowRight', ' ', 'PageDown'].includes(e.key)) { e.preventDefault(); goTo(current + 1); }
+      else if (['ArrowLeft', 'PageUp'].includes(e.key)) { e.preventDefault(); goTo(current - 1); }
+      else if (e.key === 'Home') goTo(0);
+      else if (e.key === 'End') goTo(total - 1);
+    });
+
+    // Mouse wheel (debounced)
+    let wheelLock = false;
+    deck.addEventListener('wheel', (e) => {
+      if (Math.abs(e.deltaY) < 30) return;
+      if (wheelLock) return;
+      wheelLock = true;
+      goTo(current + (e.deltaY > 0 ? 1 : -1));
+      setTimeout(() => wheelLock = false, 700);
+    });
+
+    // Touch swipe
+    let startY = 0;
+    deck.addEventListener('touchstart', (e) => { startY = e.touches[0].clientY; });
+    deck.addEventListener('touchend', (e) => {
+      const diff = startY - e.changedTouches[0].clientY;
+      if (Math.abs(diff) > 50) goTo(current + (diff > 0 ? 1 : -1));
+    });
+
+    updateChrome(0);
+  })();
+</script>
+</body>
+</html>
