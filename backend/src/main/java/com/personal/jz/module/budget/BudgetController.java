@@ -6,11 +6,13 @@ import com.personal.jz.entity.Budget;
 import com.personal.jz.module.book.BookService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
+@Tag(name = "预算", description = "预算相关接口")
 @RestController
 @RequestMapping("/api/budgets")
 @RequiredArgsConstructor

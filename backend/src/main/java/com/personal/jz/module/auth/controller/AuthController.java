@@ -13,9 +13,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 import java.util.Map;
 
+@Tag(name = "认证", description = "认证相关接口")
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor

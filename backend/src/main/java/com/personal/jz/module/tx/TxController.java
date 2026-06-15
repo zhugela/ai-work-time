@@ -7,9 +7,11 @@ import com.personal.jz.entity.TxRecord;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 import java.time.LocalDate;
 
+@Tag(name = "收支", description = "收支相关接口")
 @RestController
 @RequestMapping("/api/transactions")
 @RequiredArgsConstructor

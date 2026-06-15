@@ -9,9 +9,11 @@ import com.personal.jz.entity.Category;
 import com.personal.jz.module.book.BookService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 import java.util.List;
 
+@Tag(name = "分类", description = "分类相关接口")
 @RestController
 @RequestMapping("/api/categories")
 @RequiredArgsConstructor

@@ -6,9 +6,11 @@ import com.personal.jz.common.security.CurrentUser;
 import com.personal.jz.entity.AuditLog;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 import java.util.Map;
 
+@Tag(name = "管理员", description = "管理员相关接口")
 @RestController
 @RequestMapping("/api/admin")
 @RequiredArgsConstructor

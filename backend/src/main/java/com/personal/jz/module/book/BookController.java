@@ -5,10 +5,12 @@ import com.personal.jz.common.security.CurrentUser;
 import com.personal.jz.entity.Book;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 import java.util.List;
 import java.util.Map;
 
+@Tag(name = "账本", description = "账本相关接口")
 @RestController
 @RequestMapping("/api/books")
 @RequiredArgsConstructor
