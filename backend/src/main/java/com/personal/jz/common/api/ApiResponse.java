@@ -2,6 +2,7 @@ package com.personal.jz.common.api;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
+import com.personal.jz.common.exception.ErrorCodeEnums;
 
 @Data
 @JsonInclude(JsonInclude.Include.ALWAYS)

@@ -116,7 +116,7 @@ public class AuthService {
         u.setPasswordHash(passwordEncoder.encode(newPwd));
         userRepo.updateById(u);
         // 吊销所有 token
-        tokenRepo.update(null, com.baomidou.mybatisplus.core.toolkit.Wrappers.<AuthToken>lambdaUpdate()
+        tokenRepo.update(new com.baomidou.mybatisplus.core.toolkit.LambdaUpdateWrapper<AuthToken>()
                 .set(AuthToken::getRevoked, 1).eq(AuthToken::getUserId, uid));
     }
 
