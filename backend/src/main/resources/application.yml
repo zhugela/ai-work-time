@@ -54,10 +54,8 @@ jz:
   jwt:
     secret: ${JJWT_SECRET:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef}
     expire-seconds: 604800
-    issuer: jz-backend
   cors:
     allowed-origins:
-      - http://localhost:5173
       - http://127.0.0.1:5173
   rate-limit:
     enabled: true

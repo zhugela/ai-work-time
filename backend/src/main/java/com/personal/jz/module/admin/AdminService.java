@@ -39,7 +39,7 @@ public class AdminService {
         u.setEnabled(enabled ? 1 : 0);
         userRepo.updateById(u);
         if (!enabled) {
-            tokenRepo.update(null, new com.baomidou.mybatisplus.core.toolkit.Wrappers.<AuthToken>lambdaUpdate()
+            tokenRepo.update(new com.baomidou.mybatisplus.core.toolkit.LambdaUpdateWrapper<AuthToken>()
                     .set(AuthToken::getRevoked, 1).eq(AuthToken::getUserId, targetId));
         }
     }
